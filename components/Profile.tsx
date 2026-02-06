@@ -295,6 +295,30 @@ export const Profile: React.FC = () => {
           </div>
         </section>
 
+        {/* Services Section */}
+        <section>
+          <h3 className="text-sm font-bold text-primary uppercase tracking-wider mb-3">Services</h3>
+          <div className={`rounded-2xl p-2 shadow-lg ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`}>
+            <a 
+              href="https://evisa.bj" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={`w-full flex items-center justify-between p-3 rounded-xl transition-colors ${theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <span className="material-symbols-outlined">travel_explore</span>
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Demande de e-Visa</span>
+                  <span className="text-xs text-gray-400">Visa électronique pour le Bénin</span>
+                </div>
+              </div>
+              <span className="material-symbols-outlined text-primary">open_in_new</span>
+            </a>
+          </div>
+        </section>
+
         {/* Support Section */}
         <section>
           <h3 className="text-sm font-bold text-primary uppercase tracking-wider mb-3">Support</h3>
