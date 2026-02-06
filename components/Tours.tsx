@@ -79,10 +79,10 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
       {/* Sticky Header */}
       <div className={`sticky top-0 z-20 backdrop-blur-md pb-2 pt-8 ${theme === 'dark' ? 'bg-background-dark/95' : 'bg-gray-50/95'}`}>
         <div className="flex items-center justify-between px-5 pt-2 pb-4">
-          <h1 className="text-2xl font-serif font-medium text-white">{t('discover_circuits')}</h1>
+          <h1 className={`text-2xl font-serif font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('discover_circuits')}</h1>
           <button 
             onClick={() => setShowFiltersModal(true)}
-            className="group flex h-10 w-10 items-center justify-center rounded-full bg-charcoal-card border border-white/10 shadow-lg transition-all active:scale-95 hover:border-primary/50"
+            className={`group flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all active:scale-95 hover:border-primary/50 ${theme === 'dark' ? 'bg-charcoal-card border-white/10' : 'bg-white border-gray-200'}`}
           >
             <span className="material-symbols-outlined text-gray-400 group-hover:text-primary">tune</span>
           </button>
@@ -93,7 +93,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
           <div className="relative flex items-center">
             <span className="material-symbols-outlined absolute left-4 text-primary/80">search</span>
             <input 
-              className="h-12 w-full rounded-xl border border-primary/20 bg-charcoal-card/90 backdrop-blur-xl pl-12 pr-4 text-base font-medium shadow-lg ring-1 ring-white/5 placeholder:text-gray-500 focus:ring-2 focus:ring-primary text-white" 
+              className={`h-12 w-full rounded-xl border border-primary/20 backdrop-blur-xl pl-12 pr-4 text-base font-medium shadow-lg ring-1 placeholder:text-gray-500 focus:ring-2 focus:ring-primary ${theme === 'dark' ? 'bg-charcoal-card/90 ring-white/5 text-white' : 'bg-white ring-gray-200 text-slate-900'}`} 
               placeholder={t('search_tours')} 
               type="text"
               value={searchQuery}
@@ -119,7 +119,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
               className={`flex h-9 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-medium transition-all ${
                 activeFilter === filter.id 
                   ? 'bg-primary text-navy-dark font-bold shadow-glow border border-primary' 
-                  : 'bg-transparent border border-white/10 text-gray-400 hover:text-primary hover:border-primary/50'
+                  : `bg-transparent border ${theme === 'dark' ? 'border-white/10 text-gray-400' : 'border-gray-300 text-gray-600'} hover:text-primary hover:border-primary/50`
               }`}
             >
               <span className="material-symbols-outlined text-[18px]">{filter.icon}</span> {filter.label}

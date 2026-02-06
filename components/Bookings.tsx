@@ -43,7 +43,7 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
       </header>
 
       <div className="px-6 pb-6">
-        <div className="flex p-1 bg-charcoal-card border border-white/5 rounded-xl relative">
+        <div className={`flex p-1 rounded-xl relative ${theme === 'dark' ? 'bg-charcoal-card border border-white/5' : 'bg-gray-100 border border-gray-200'}`}>
           {/* Animated background tab */}
           <div className={`w-1/2 h-full absolute top-1 bottom-1 bg-primary/20 border border-primary/30 rounded-lg z-0 transition-all duration-300 ${activeTab === 'upcoming' ? 'left-1' : 'left-[calc(50%-4px)] translate-x-1'}`}></div>
           
@@ -65,7 +65,7 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
       <div className="flex flex-col gap-6 px-6 pb-6 min-h-[50vh]">
         {filteredBookings.length > 0 ? (
           filteredBookings.map((booking) => (
-            <div key={booking.id} className="group relative flex flex-col bg-charcoal-card border border-white/5 rounded-[20px] shadow-xl shadow-black/50 overflow-hidden transition-all hover:border-primary/30">
+            <div key={booking.id} className={`group relative flex flex-col rounded-[20px] shadow-xl overflow-hidden transition-all hover:border-primary/30 ${theme === 'dark' ? 'bg-charcoal-card border border-white/5 shadow-black/50' : 'bg-white border border-gray-200 shadow-gray-300/50'}`}>
               <div className="h-40 w-full relative overflow-hidden">
                 <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${booking.image}')` }}></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-charcoal-dark via-charcoal-dark/20 to-transparent"></div>
@@ -80,7 +80,7 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
               <div className="p-5 flex flex-col gap-3">
                 <div className="flex justify-between items-start gap-2">
                   <div>
-                    <h3 className="text-lg font-serif font-medium leading-tight mb-1 text-white">{booking.title}</h3>
+                    <h3 className={`text-lg font-serif font-medium leading-tight mb-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{booking.title}</h3>
                     <div className="flex items-center gap-1.5 text-gray-400 text-sm">
                       <span className="material-symbols-outlined text-[16px] text-primary">calendar_month</span> <span>{booking.date}</span>
                       <span className="w-1 h-1 rounded-full bg-gray-600"></span>
@@ -89,7 +89,7 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
                   </div>
                   <div className="flex flex-col items-end">
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('guests')}</span>
-                    <span className="font-bold text-white">{booking.guests}</span>
+                    <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{booking.guests}</span>
                   </div>
                 </div>
                 <hr className="border-dashed border-white/10 my-1"/>

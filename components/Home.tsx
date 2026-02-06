@@ -141,10 +141,10 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
 
       {/* Floating Search Bar */}
       <div className="relative px-6 -mt-10 z-20">
-        <div className="bg-charcoal-card/90 backdrop-blur-xl rounded-xl shadow-2xl shadow-black/70 p-1.5 flex items-center gap-2 border border-primary/20 ring-1 ring-white/5">
+        <div className={`backdrop-blur-xl rounded-xl shadow-2xl p-1.5 flex items-center gap-2 border border-primary/20 ring-1 ${theme === 'dark' ? 'bg-charcoal-card/90 shadow-black/70 ring-white/5' : 'bg-white shadow-gray-300/50 ring-gray-200'}`}>
           <span className="material-symbols-outlined text-primary/80 ml-3">search</span>
           <input 
-            className="w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-white placeholder:text-gray-500 h-11 font-serif tracking-wide" 
+            className={`w-full bg-transparent border-none focus:ring-0 text-sm font-medium placeholder:text-gray-500 h-11 font-serif tracking-wide ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} 
             placeholder={t('search_placeholder')}
             type="text"
             value={searchQuery}
@@ -215,7 +215,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
         <div className="flex items-end justify-between px-6 mb-6">
           <div>
             <span className="text-primary text-[10px] uppercase tracking-widest font-bold">Discover</span>
-            <h2 className="text-2xl font-serif font-medium text-white">{t('featured')}</h2>
+            <h2 className={`text-2xl font-serif font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('featured')}</h2>
           </div>
           <a className="text-primary/80 text-xs font-serif italic border-b border-primary/30 pb-0.5 hover:text-primary transition-colors" href="#">{t('see_all')}</a>
         </div>
@@ -245,10 +245,10 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
 
       {/* Heritage Sites */}
       <section className="mt-4 px-6">
-        <h2 className="text-2xl font-serif font-medium text-white mb-5">{t('heritage_sites')}</h2>
+        <h2 className={`text-2xl font-serif font-medium mb-5 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('heritage_sites')}</h2>
         <div className="grid grid-cols-2 gap-4">
           {heritage.map((site) => (
-            <div key={site.id} className="bg-charcoal-card border border-white/5 rounded-2xl overflow-hidden shadow-lg hover:shadow-gold hover:border-primary/30 transition-all duration-300 group cursor-pointer" onClick={() => onSelectLocation(site)}>
+            <div key={site.id} className={`rounded-2xl overflow-hidden shadow-lg hover:shadow-gold hover:border-primary/30 transition-all duration-300 group cursor-pointer ${theme === 'dark' ? 'bg-charcoal-card border border-white/5' : 'bg-white border border-gray-200'}`} onClick={() => onSelectLocation(site)}>
               <div className="h-36 bg-cover bg-center relative" style={{ backgroundImage: `url('${site.image}')` }}>
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
               </div>
@@ -256,7 +256,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
                 <div className="absolute -top-8 right-3 bg-primary w-8 h-8 rounded-full flex items-center justify-center shadow-lg text-navy-dark">
                   <span className="material-symbols-outlined text-[16px]">arrow_outward</span>
                 </div>
-                <h3 className="text-base font-serif text-white line-clamp-1">{site.name}</h3>
+                <h3 className={`text-base font-serif line-clamp-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{site.name}</h3>
                 <div className="flex items-center mt-2">
                   <span className="material-symbols-outlined text-primary text-[14px] mr-1.5">location_on</span>
                   <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{site.subtitle}</p>
@@ -270,30 +270,30 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
       {/* Nearby Experiences */}
       <section className="mt-12 px-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-serif font-medium text-white">{t('nearby')}</h2>
+          <h2 className={`text-2xl font-serif font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('nearby')}</h2>
           <div className="flex gap-2">
             <button 
               onClick={() => setNearbyFilter('all')}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${nearbyFilter === 'all' ? 'bg-primary text-navy-dark shadow-glow border border-primary' : 'bg-transparent border border-white/10 text-gray-400 hover:text-primary hover:border-primary/50'}`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${nearbyFilter === 'all' ? 'bg-primary text-navy-dark shadow-glow border border-primary' : `bg-transparent border ${theme === 'dark' ? 'border-white/10 text-gray-400' : 'border-gray-300 text-gray-600'} hover:text-primary hover:border-primary/50`}`}
             >{t('all')}</button>
             <button 
               onClick={() => setNearbyFilter('Food')}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${nearbyFilter === 'Food' ? 'bg-primary text-navy-dark shadow-glow border border-primary' : 'bg-transparent border border-white/10 text-gray-400 hover:text-primary hover:border-primary/50'}`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${nearbyFilter === 'Food' ? 'bg-primary text-navy-dark shadow-glow border border-primary' : `bg-transparent border ${theme === 'dark' ? 'border-white/10 text-gray-400' : 'border-gray-300 text-gray-600'} hover:text-primary hover:border-primary/50`}`}
             >{t('food')}</button>
             <button 
               onClick={() => setNearbyFilter('Hotel')}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${nearbyFilter === 'Hotel' ? 'bg-primary text-navy-dark shadow-glow border border-primary' : 'bg-transparent border border-white/10 text-gray-400 hover:text-primary hover:border-primary/50'}`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${nearbyFilter === 'Hotel' ? 'bg-primary text-navy-dark shadow-glow border border-primary' : `bg-transparent border ${theme === 'dark' ? 'border-white/10 text-gray-400' : 'border-gray-300 text-gray-600'} hover:text-primary hover:border-primary/50`}`}
             >{t('hotels')}</button>
           </div>
         </div>
         <div className="flex flex-col gap-5">
           {filteredNearby.map((activity) => (
-            <div key={activity.id} className="flex gap-4 p-3 rounded-2xl bg-charcoal-card border border-white/5 shadow-lg items-center relative overflow-hidden group hover:border-primary/30 transition-all cursor-pointer" onClick={() => onSelectLocation(activity)}>
+            <div key={activity.id} className={`flex gap-4 p-3 rounded-2xl shadow-lg items-center relative overflow-hidden group hover:border-primary/30 transition-all cursor-pointer ${theme === 'dark' ? 'bg-charcoal-card border border-white/5' : 'bg-white border border-gray-200'}`} onClick={() => onSelectLocation(activity)}>
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full pointer-events-none"></div>
               <div className="w-24 h-24 rounded-xl bg-cover bg-center shrink-0 shadow-inner border border-white/5" style={{ backgroundImage: `url('${activity.image}')` }}></div>
               <div className="flex-1 z-10 pr-2">
                 <div className="flex justify-between items-start">
-                  <h3 className="font-serif text-lg text-white">{activity.name}</h3>
+                  <h3 className={`font-serif text-lg ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{activity.name}</h3>
                   <span className="text-primary font-bold text-[10px] bg-primary/10 border border-primary/20 px-2 py-0.5 rounded shadow-sm">{activity.price}</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1 font-display tracking-wide uppercase">{activity.subtitle}</p>
