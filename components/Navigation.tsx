@@ -1,6 +1,7 @@
 import React from 'react';
 import { ViewState } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface NavigationProps {
   currentView: ViewState;
@@ -9,6 +10,7 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeView }) => {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   
   const getIconClass = (view: ViewState) => {
     return currentView === view ? "text-primary" : "text-gray-400 dark:text-gray-500 hover:text-primary transition-colors";
@@ -17,7 +19,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
   const isActive = (view: ViewState) => currentView === view;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-charcoal-dark/95 backdrop-blur-xl border-t border-white/5 px-8 py-5 flex justify-between items-center z-50 shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.8)] safe-area-bottom">
+    <nav className={`fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t px-8 py-5 flex justify-between items-center z-50 safe-area-bottom transition-colors duration-300 ${theme === 'dark' ? 'bg-charcoal-dark/95 border-white/5 shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.8)]' : 'bg-white/95 border-gray-200 shadow-lg'}`}>
       <button onClick={() => onChangeView('HOME')} className={`flex flex-col items-center gap-1.5 ${isActive('HOME') ? 'text-primary' : 'text-gray-500 hover:text-primary'} transition-colors relative`}>
         {isActive('HOME') && <div className="absolute -top-5 w-10 h-0.5 bg-primary rounded-full shadow-glow"></div>}
         <span className={`material-symbols-outlined ${isActive('HOME') ? 'fill-1 drop-shadow-md' : ''}`}>home</span>

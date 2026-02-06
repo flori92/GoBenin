@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { IMAGES, getFeaturedDestinations, getHeritageSites, getNearbyActivities } from '../constants';
 import { Location } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface HomeProps {
   onSelectLocation: (location: Location) => void;
@@ -9,6 +10,7 @@ interface HomeProps {
 
 export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
   const { language, setLanguage, t } = useLanguage();
+  const { theme } = useTheme();
   const featured = getFeaturedDestinations(language);
   const heritage = getHeritageSites(language);
   const nearby = getNearbyActivities(language);
@@ -55,7 +57,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
   };
 
   return (
-    <div className="relative flex flex-col w-full pb-32 bg-background-dark text-gray-200">
+    <div className={`relative flex flex-col w-full pb-32 transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark text-gray-200' : 'bg-gray-50 text-slate-800'}`}>
       {/* Immersive Video Header Section */}
       <div className="relative w-full h-[50vh] min-h-[420px] overflow-hidden">
         {/* Video Background */}

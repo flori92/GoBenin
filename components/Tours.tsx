@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { getTours } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Tour } from '../types';
 
 interface ToursProps {
@@ -10,6 +11,7 @@ interface ToursProps {
 
 export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
   const { language, t } = useLanguage();
+  const { theme } = useTheme();
   const allTours = getTours(language);
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,9 +75,9 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background-dark text-gray-200">
+    <div className={`flex flex-col h-full transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark text-gray-200' : 'bg-gray-50 text-slate-800'}`}>
       {/* Sticky Header */}
-      <div className="sticky top-0 z-20 bg-background-dark/95 backdrop-blur-md pb-2 pt-8">
+      <div className={`sticky top-0 z-20 backdrop-blur-md pb-2 pt-8 ${theme === 'dark' ? 'bg-background-dark/95' : 'bg-gray-50/95'}`}>
         <div className="flex items-center justify-between px-5 pt-2 pb-4">
           <h1 className="text-2xl font-serif font-medium text-white">{t('discover_circuits')}</h1>
           <button 

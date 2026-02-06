@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { getBookings } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { ViewState, Booking } from '../types';
 
 interface BookingsProps {
@@ -10,6 +11,7 @@ interface BookingsProps {
 
 export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings = [] }) => {
   const { language, t } = useLanguage();
+  const { theme } = useTheme();
   const defaultBookings = getBookings(language);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
@@ -31,9 +33,9 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-background-dark text-gray-200 pb-24 overflow-y-auto">
-      <header className="flex items-center justify-between px-6 py-5 sticky top-0 z-20 bg-background-dark/95 backdrop-blur-md pt-12">
-        <h1 className="text-2xl font-serif font-medium text-white">{t('my_bookings')}</h1>
+    <div className={`flex-1 flex flex-col h-full pb-24 overflow-y-auto transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark text-gray-200' : 'bg-gray-50 text-slate-800'}`}>
+      <header className={`flex items-center justify-between px-6 py-5 sticky top-0 z-20 backdrop-blur-md pt-12 ${theme === 'dark' ? 'bg-background-dark/95' : 'bg-gray-50/95'}`}>
+        <h1 className={`text-2xl font-serif font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('my_bookings')}</h1>
         <button className="bg-charcoal-dark/50 backdrop-blur-md text-primary border border-primary/30 w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary hover:text-navy-dark transition-all shadow-glow relative">
           <span className="material-symbols-outlined">notifications</span>
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
