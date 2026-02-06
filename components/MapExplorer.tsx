@@ -1,5 +1,5 @@
-import React from 'react';
-import { IMAGES, getHeritageSites, getFeaturedDestinations } from '../constants';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { IMAGES, getHeritageSites, getFeaturedDestinations, getNearbyActivities } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Location } from '../types';
 
@@ -7,129 +7,289 @@ interface MapExplorerProps {
   onSelectLocation?: (location: Location) => void;
 }
 
+// Coordonnées des sites au Bénin
+const LOCATIONS_COORDS: Record<string, { lat: number; lng: number; icon: string }> = {
+  'pendjari': { lat: 11.5, lng: 1.5, icon: 'park' },
+  'royal-palaces': { lat: 7.18, lng: 1.99, icon: 'castle' },
+  'ouidah': { lat: 6.36, lng: 2.08, icon: 'museum' },
+  'grand-popo': { lat: 6.28, lng: 1.82, icon: 'beach_access' },
+  'ganvie': { lat: 6.47, lng: 2.42, icon: 'sailing' },
+  'chez-maman': { lat: 6.37, lng: 2.39, icon: 'restaurant' },
+  'tata-somba': { lat: 10.3, lng: 1.3, icon: 'hotel' },
+};
+
+const BENIN_CENTER = { lat: 9.3, lng: 2.3 };
+
 export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) => {
   const { t, language } = useLanguage();
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [zoom, setZoom] = useState(7);
+  const [center, setCenter] = useState(BENIN_CENTER);
   
-  // Get actual data objects to pass to details view
+  // Get all locations
   const heritageSites = getHeritageSites(language);
   const featured = getFeaturedDestinations(language);
+  const nearby = getNearbyActivities(language);
   
-  const pendjariData = heritageSites.find(s => s.id === 'pendjari');
-  const palacesData = heritageSites.find(s => s.id === 'royal-palaces');
-  // Ouidah is in featured, find it
-  const ouidahData = featured.find(f => f.id === 'ouidah');
+  const allLocations = useMemo(() => {
+    const combined = [...featured, ...heritageSites, ...nearby];
+    // Remove duplicates
+    return combined.filter((loc, index, self) => 
+      index === self.findIndex(l => l.id === loc.id)
+    ).map(loc => ({
+      ...loc,
+      coords: LOCATIONS_COORDS[loc.id] || { lat: 6.5 + Math.random(), lng: 2 + Math.random(), icon: 'location_on' }
+    }));
+  }, [featured, heritageSites, nearby]);
 
-  const handleMarkerClick = (data?: Location) => {
-    if (data && onSelectLocation) {
-      onSelectLocation(data);
+  const filteredLocations = useMemo(() => {
+    let result = allLocations;
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(loc => 
+        loc.name.toLowerCase().includes(query) ||
+        loc.subtitle.toLowerCase().includes(query)
+      );
+    }
+    
+    if (activeFilter !== 'all') {
+      result = result.filter(loc => loc.category.toLowerCase() === activeFilter);
+    }
+    
+    return result;
+  }, [allLocations, searchQuery, activeFilter]);
+
+  const filters = [
+    { id: 'all', label: t('all'), icon: 'explore' },
+    { id: 'nature', label: t('nature'), icon: 'forest' },
+    { id: 'heritage', label: t('culture'), icon: 'temple_buddhist' },
+    { id: 'culture', label: t('history'), icon: 'history_edu' },
+    { id: 'food', label: t('food'), icon: 'restaurant' },
+    { id: 'hotel', label: t('hotels'), icon: 'hotel' },
+  ];
+
+  const handleMarkerClick = (location: Location & { coords: { lat: number; lng: number; icon: string } }) => {
+    setSelectedMarker(location.id);
+    setCenter({ lat: location.coords.lat, lng: location.coords.lng });
+    setZoom(10);
+  };
+
+  const handleLocationSelect = (location: Location) => {
+    if (onSelectLocation) {
+      onSelectLocation(location);
     }
   };
 
+  const handleGetUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setZoom(12);
+        },
+        (error) => {
+          console.log('Geolocation error:', error);
+          // Default to Cotonou if geolocation fails
+          setCenter({ lat: 6.36, lng: 2.43 });
+        }
+      );
+    }
+  };
+
+  // Convert lat/lng to pixel position on the map
+  const getMarkerPosition = (lat: number, lng: number) => {
+    // Benin bounds approximately: lat 6-12, lng 0.8-3.8
+    const latMin = 5.5, latMax = 12.5, lngMin = 0.5, lngMax = 4;
+    const x = ((lng - lngMin) / (lngMax - lngMin)) * 100;
+    const y = ((latMax - lat) / (latMax - latMin)) * 100;
+    return { x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) };
+  };
+
+  const selectedLocation = filteredLocations.find(loc => loc.id === selectedMarker);
+
   return (
-    <div className="h-screen w-full overflow-hidden flex flex-col relative bg-[#e5e0d8]">
-      {/* Map Layer */}
-      <div className="absolute inset-0 z-0 w-full h-full bg-cover bg-center opacity-90" style={{ backgroundImage: `url('${IMAGES.map}')`, filter: 'grayscale(20%) contrast(90%) brightness(110%)' }}></div>
-      
-      {/* Markers - Made interactive */}
-      
-      {/* Pendjari Marker */}
-      <div 
-        onClick={() => handleMarkerClick(pendjariData)}
-        className="absolute top-[20%] left-[25%] flex flex-col items-center gap-1 cursor-pointer transform hover:scale-110 transition-transform z-0 group"
-      >
-        <div className="relative flex items-center justify-center size-10 bg-primary rounded-full shadow-lg border-2 border-white text-white group-active:scale-95 transition-transform">
-          <span className="material-symbols-outlined text-xl">park</span>
-        </div>
-        <div className="bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow-sm text-xs font-bold text-black whitespace-nowrap">W-Arly-Pendjari</div>
-        <div className="absolute top-9 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-primary"></div>
+    <div className="h-screen w-full overflow-hidden flex flex-col relative bg-background-dark">
+      {/* Interactive Map Layer with OpenStreetMap */}
+      <div className="absolute inset-0 z-0 w-full h-full">
+        <iframe
+          src={`https://www.openstreetmap.org/export/embed.html?bbox=${center.lng - 3/zoom}%2C${center.lat - 2/zoom}%2C${center.lng + 3/zoom}%2C${center.lat + 2/zoom}&layer=mapnik&marker=${center.lat}%2C${center.lng}`}
+          className="w-full h-full border-0"
+          style={{ filter: 'saturate(0.8) contrast(1.1)' }}
+          title="Map"
+        />
+        {/* Dark overlay for luxe theme */}
+        <div className="absolute inset-0 bg-navy-dark/30 pointer-events-none"></div>
       </div>
 
-      {/* Royal Palaces Marker */}
-      <div 
-        onClick={() => handleMarkerClick(palacesData)}
-        className="absolute top-[60%] left-[45%] flex flex-col items-center gap-1 cursor-pointer transform hover:scale-110 transition-transform z-10 animate-bounce group"
-      >
-         <div className="relative flex items-center justify-center size-12 bg-primary rounded-full shadow-lg border-[3px] border-white text-white group-active:scale-95 transition-transform">
-          <span className="material-symbols-outlined text-2xl">castle</span>
-        </div>
-        <div className="bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow-sm text-xs font-bold text-black whitespace-nowrap">{t('history')}</div>
-        <div className="absolute top-11 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-primary"></div>
-      </div>
-
-      {/* Ouidah Marker */}
-      <div 
-        onClick={() => handleMarkerClick(ouidahData)}
-        className="absolute top-[75%] left-[55%] flex flex-col items-center gap-1 cursor-pointer transform hover:scale-110 transition-transform z-0 group"
-      >
-         <div className="relative flex items-center justify-center size-10 bg-primary rounded-full shadow-lg border-2 border-white text-white group-active:scale-95 transition-transform">
-          <span className="material-symbols-outlined text-xl">museum</span>
-        </div>
-        <div className="bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow-sm text-xs font-bold text-black whitespace-nowrap">Ouidah</div>
-        <div className="absolute top-9 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-primary"></div>
+      {/* Custom Markers Overlay */}
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        {filteredLocations.map(location => {
+          const pos = getMarkerPosition(location.coords.lat, location.coords.lng);
+          const isSelected = selectedMarker === location.id;
+          return (
+            <div
+              key={location.id}
+              onClick={() => handleMarkerClick(location)}
+              className={`absolute flex flex-col items-center cursor-pointer pointer-events-auto transform transition-all duration-300 ${
+                isSelected ? 'scale-125 z-20' : 'hover:scale-110 z-10'
+              }`}
+              style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -100%)' }}
+            >
+              <div className={`relative flex items-center justify-center rounded-full shadow-lg border-2 transition-all ${
+                isSelected 
+                  ? 'size-12 bg-primary border-white text-navy-dark animate-bounce' 
+                  : 'size-10 bg-charcoal-card border-primary/50 text-primary hover:bg-primary hover:text-navy-dark'
+              }`}>
+                <span className="material-symbols-outlined text-xl">{location.coords.icon}</span>
+              </div>
+              {isSelected && (
+                <div className="bg-charcoal-card/95 backdrop-blur-xl px-3 py-1.5 rounded-lg shadow-lg text-xs font-bold text-white whitespace-nowrap mt-1 border border-primary/30">
+                  {location.name}
+                </div>
+              )}
+              <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent ${
+                isSelected ? 'border-t-[8px] border-t-primary' : 'border-t-[6px] border-t-charcoal-card'
+              }`}></div>
+            </div>
+          );
+        })}
+        
+        {/* User location marker */}
+        {userLocation && (
+          <div 
+            className="absolute z-30 pointer-events-none"
+            style={{ 
+              left: `${getMarkerPosition(userLocation.lat, userLocation.lng).x}%`, 
+              top: `${getMarkerPosition(userLocation.lat, userLocation.lng).y}%`,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <div className="size-4 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
+            <div className="absolute inset-0 size-4 bg-blue-500/30 rounded-full animate-ping"></div>
+          </div>
+        )}
       </div>
 
       {/* Top Search Area */}
-      <div className="relative z-10 pt-12 px-4 pb-4 w-full bg-gradient-to-b from-white/80 to-transparent pointer-events-none">
-        <div className="flex flex-col gap-3 max-w-md mx-auto w-full pointer-events-auto">
-          <label className="flex w-full items-center h-12 rounded-xl bg-white shadow-lg border border-gray-100">
-             <div className="flex items-center justify-center pl-4 text-primary"><span className="material-symbols-outlined">search</span></div>
-             <input className="w-full bg-transparent border-none text-slate-900 placeholder:text-gray-400 focus:ring-0 text-base font-medium px-3" placeholder={t('search_tours')} />
-             <button className="flex items-center justify-center pr-4 text-gray-400"><span className="material-symbols-outlined">tune</span></button>
-          </label>
-           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            <button className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full shadow-sm whitespace-nowrap text-sm font-semibold"><span className="material-symbols-outlined text-lg">forest</span> {t('nature')}</button>
-            <button className="flex items-center gap-1.5 px-4 py-2 bg-white text-slate-900 rounded-full shadow-sm whitespace-nowrap text-sm font-medium border border-gray-100"><span className="material-symbols-outlined text-lg text-primary">temple_buddhist</span> {t('culture')}</button>
-            <button className="flex items-center gap-1.5 px-4 py-2 bg-white text-slate-900 rounded-full shadow-sm whitespace-nowrap text-sm font-medium border border-gray-100"><span className="material-symbols-outlined text-lg text-primary">history_edu</span> {t('history')}</button>
-           </div>
+      <div className="relative z-20 pt-12 px-4 pb-4 w-full bg-gradient-to-b from-background-dark via-background-dark/80 to-transparent">
+        <div className="flex flex-col gap-3 max-w-md mx-auto w-full">
+          <div className="flex w-full items-center h-12 rounded-xl bg-charcoal-card/90 backdrop-blur-xl shadow-lg border border-primary/20">
+            <div className="flex items-center justify-center pl-4 text-primary"><span className="material-symbols-outlined">search</span></div>
+            <input 
+              className="w-full bg-transparent border-none text-white placeholder:text-gray-500 focus:ring-0 text-base font-medium px-3" 
+              placeholder={t('search_tours')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="pr-4 text-gray-400 hover:text-white">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            )}
+          </div>
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            {filters.map(filter => (
+              <button 
+                key={filter.id}
+                onClick={() => setActiveFilter(filter.id)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full shadow-sm whitespace-nowrap text-sm font-medium transition-all ${
+                  activeFilter === filter.id 
+                    ? 'bg-primary text-navy-dark font-bold shadow-glow' 
+                    : 'bg-charcoal-card/80 text-gray-300 border border-white/10 hover:border-primary/50'
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">{filter.icon}</span> {filter.label}
+              </button>
+            ))}
+          </div>
+          <div className="text-xs text-gray-500 px-1">
+            {filteredLocations.length} lieu{filteredLocations.length > 1 ? 'x' : ''} trouvé{filteredLocations.length > 1 ? 's' : ''}
+          </div>
         </div>
       </div>
 
       <div className="flex-1"></div>
 
-      {/* Carousel */}
-      <div className="relative z-10 w-full bg-gradient-to-t from-background-light via-background-light/90 to-transparent dark:from-background-dark dark:via-background-dark/90 pb-24 pt-10">
-         <div className="flex justify-end px-4 mb-4 gap-3">
-            <button className="flex size-12 items-center justify-center rounded-full bg-white dark:bg-[#2c241b] text-slate-900 dark:text-white shadow-lg active:scale-95 transition-transform">
-                <span className="material-symbols-outlined">my_location</span>
-            </button>
-         </div>
-         <div className="w-full overflow-x-auto no-scrollbar px-4 pb-2">
-            <div className="flex gap-4 w-max">
-                <div 
-                  onClick={() => handleMarkerClick(palacesData)}
-                  className="flex flex-col w-[280px] bg-white dark:bg-[#2c241b] rounded-2xl p-3 shadow-lg border-2 border-primary cursor-pointer active:scale-95 transition-transform"
-                >
-                    <div className="relative w-full h-32 rounded-xl overflow-hidden mb-3">
-                         <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${IMAGES.palaceDetail}')` }}></div>
-                         <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
-                            <span className="material-symbols-outlined text-primary text-sm fill-1">star</span><span className="text-xs font-bold text-black">4.8</span>
-                         </div>
-                    </div>
-                    <div className="px-1">
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">Royal Palaces of Abomey</h3>
-                        <p className="text-primary text-sm font-medium mt-1">Cultural Heritage</p>
-                        <div className="flex items-center gap-1 mt-2 text-gray-500 text-xs"><span className="material-symbols-outlined text-sm">near_me</span> 12 km away</div>
-                    </div>
-                </div>
+      {/* Floating Action Buttons */}
+      <div className="absolute right-4 bottom-[280px] z-20 flex flex-col gap-3">
+        <button 
+          onClick={() => setZoom(z => Math.min(15, z + 1))}
+          className="flex size-11 items-center justify-center rounded-full bg-charcoal-card/90 backdrop-blur text-white shadow-lg border border-white/10 active:scale-95 transition-transform hover:border-primary/50"
+        >
+          <span className="material-symbols-outlined">add</span>
+        </button>
+        <button 
+          onClick={() => setZoom(z => Math.max(5, z - 1))}
+          className="flex size-11 items-center justify-center rounded-full bg-charcoal-card/90 backdrop-blur text-white shadow-lg border border-white/10 active:scale-95 transition-transform hover:border-primary/50"
+        >
+          <span className="material-symbols-outlined">remove</span>
+        </button>
+        <button 
+          onClick={handleGetUserLocation}
+          className="flex size-11 items-center justify-center rounded-full bg-primary text-navy-dark shadow-glow active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined">my_location</span>
+        </button>
+      </div>
 
-                 <div 
-                   onClick={() => handleMarkerClick(pendjariData)}
-                   className="flex flex-col w-[280px] bg-white dark:bg-[#2c241b] rounded-2xl p-3 shadow-md border border-gray-100 dark:border-gray-700 cursor-pointer opacity-90 active:scale-95 transition-transform"
-                >
-                    <div className="relative w-full h-32 rounded-xl overflow-hidden mb-3">
-                         <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${IMAGES.pendjari}')` }}></div>
-                         <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
-                            <span className="material-symbols-outlined text-primary text-sm fill-1">star</span><span className="text-xs font-bold text-black">4.9</span>
-                         </div>
-                    </div>
-                    <div className="px-1">
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">W-Arly-Pendjari</h3>
-                        <p className="text-primary text-sm font-medium mt-1">Nature Reserve</p>
-                        <div className="flex items-center gap-1 mt-2 text-gray-500 text-xs"><span className="material-symbols-outlined text-sm">near_me</span> 240 km away</div>
-                    </div>
+      {/* Bottom Carousel */}
+      <div className="relative z-20 w-full bg-gradient-to-t from-background-dark via-background-dark/95 to-transparent pb-24 pt-6">
+        <div className="w-full overflow-x-auto no-scrollbar px-4 pb-2">
+          <div className="flex gap-4 w-max">
+            {filteredLocations.slice(0, 6).map((location) => (
+              <div 
+                key={location.id}
+                onClick={() => handleLocationSelect(location)}
+                className={`flex flex-col w-[260px] bg-charcoal-card rounded-2xl p-3 shadow-xl cursor-pointer active:scale-95 transition-all border-2 ${
+                  selectedMarker === location.id ? 'border-primary shadow-gold' : 'border-white/5 hover:border-primary/30'
+                }`}
+              >
+                <div className="relative w-full h-28 rounded-xl overflow-hidden mb-3">
+                  <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${location.image}')` }}></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal-dark/60 to-transparent"></div>
+                  <div className="absolute top-2 right-2 bg-charcoal-dark/80 backdrop-blur px-2 py-0.5 rounded-full flex items-center gap-1 border border-primary/30">
+                    <span className="material-symbols-outlined text-primary text-sm fill-1">star</span>
+                    <span className="text-xs font-bold text-white">{location.rating}</span>
+                  </div>
+                  <div className="absolute bottom-2 left-2">
+                    <span className="bg-primary/90 text-navy-dark text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                      {location.category}
+                    </span>
+                  </div>
                 </div>
-            </div>
-         </div>
+                <div className="px-1">
+                  <h3 className="text-base font-serif font-medium text-white leading-tight line-clamp-1">{location.name}</h3>
+                  <p className="text-gray-400 text-xs mt-1 line-clamp-1">{location.subtitle}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-1 text-gray-500 text-xs">
+                      <span className="material-symbols-outlined text-primary text-sm">location_on</span> 
+                      {location.distance || 'Bénin'}
+                    </div>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleMarkerClick(location); }}
+                      className="text-primary text-xs font-semibold hover:underline"
+                    >
+                      Voir sur carte
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

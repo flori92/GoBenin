@@ -6,9 +6,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 interface DetailsProps {
   location: Location;
   onBack: () => void;
+  onBook?: () => void;
 }
 
-export const Details: React.FC<DetailsProps> = ({ location, onBack }) => {
+export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) => {
   const images = location.images || [];
   const { t } = useLanguage();
 
@@ -166,13 +167,16 @@ export const Details: React.FC<DetailsProps> = ({ location, onBack }) => {
       </div>
 
       {/* Sticky Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 w-full border-t border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-[#221b10]/90 px-6 py-4 backdrop-blur-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-50 w-full border-t border-white/10 bg-charcoal-dark/95 px-6 py-4 backdrop-blur-lg">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
-            <span className="text-xs text-gray-500 dark:text-gray-400">{t('price_per_person')}</span>
-            <span className="text-xl font-bold text-slate-900 dark:text-white">{location.price || t('contact_price')}</span>
+            <span className="text-xs text-gray-500">{t('price_per_person')}</span>
+            <span className="text-xl font-bold text-white">{location.price || t('contact_price')}</span>
           </div>
-          <button className="flex-1 rounded-xl bg-primary px-6 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-primary/30 transition-transform active:scale-95 hover:bg-primary-dark">
+          <button 
+            onClick={onBook}
+            className="flex-1 rounded-xl bg-primary px-6 py-3.5 text-center text-sm font-bold text-navy-dark shadow-glow transition-transform active:scale-95 hover:bg-primary-light"
+          >
             {t('book_visit')}
           </button>
         </div>

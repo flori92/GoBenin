@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ViewState, Location } from './types';
+import { ViewState, Location, Tour, Booking } from './types';
 import { Home } from './components/Home';
 import { Navigation } from './components/Navigation';
 import { Details } from './components/Details';
@@ -8,11 +8,15 @@ import { Bookings } from './components/Bookings';
 import { MapExplorer } from './components/MapExplorer';
 import { Profile } from './components/Profile';
 import { SplashScreen } from './components/SplashScreen';
+import { BookingModal, BookingData } from './components/BookingModal';
 import { LanguageProvider } from './contexts/LanguageContext';
 
 export default function App() {
   const [view, setView] = useState<ViewState>('SPLASH');
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [bookingItem, setBookingItem] = useState<Tour | Location | null>(null);
+  const [userBookings, setUserBookings] = useState<Booking[]>([]);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const handleSplashFinish = () => {
     setView('HOME');
@@ -28,21 +32,50 @@ export default function App() {
     setView('HOME');
   };
 
+  const handleBookTour = (tour: Tour) => {
+    setBookingItem(tour);
+  };
+
+  const handleBookLocation = (location: Location) => {
+    setBookingItem(location);
+  };
+
+  const handleCloseBooking = () => {
+    setBookingItem(null);
+  };
+
+  const handleConfirmBooking = (bookingData: BookingData) => {
+    const newBooking: Booking = {
+      id: `booking-${Date.now()}`,
+      title: bookingData.itemName,
+      date: bookingData.date,
+      time: bookingData.time,
+      guests: `${bookingData.guests} ${bookingData.guests > 1 ? 'personnes' : 'personne'}`,
+      status: 'Confirmed',
+      image: bookingData.image,
+    };
+    
+    setUserBookings(prev => [newBooking, ...prev]);
+    setBookingItem(null);
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 3000);
+  };
+
   const Content = () => {
     if (view === 'SPLASH') {
       return <SplashScreen onFinish={handleSplashFinish} />;
     }
 
     if (view === 'DETAILS' && selectedLocation) {
-      return <Details location={selectedLocation} onBack={handleBackFromDetails} />;
+      return <Details location={selectedLocation} onBack={handleBackFromDetails} onBook={() => handleBookLocation(selectedLocation)} />;
     }
 
     return (
       <div className="h-full min-h-screen w-full relative">
         {view === 'HOME' && <Home onSelectLocation={handleSelectLocation} />}
-        {view === 'TOURS' && <Tours />}
+        {view === 'TOURS' && <Tours onBookTour={handleBookTour} onViewOnMap={(tour) => { setView('MAP'); }} />}
         {view === 'MAP' && <MapExplorer onSelectLocation={handleSelectLocation} />}
-        {view === 'BOOKINGS' && <Bookings onChangeView={setView} />}
+        {view === 'BOOKINGS' && <Bookings onChangeView={setView} customBookings={userBookings} />}
         {view === 'PROFILE' && <Profile />}
         
         {/* Navigation is persistent across main tabs */}
@@ -54,6 +87,23 @@ export default function App() {
   return (
     <LanguageProvider>
       <Content />
+      
+      {/* Booking Modal */}
+      {bookingItem && (
+        <BookingModal 
+          item={bookingItem} 
+          onClose={handleCloseBooking} 
+          onConfirm={handleConfirmBooking} 
+        />
+      )}
+      
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
+          <span className="material-symbols-outlined">check_circle</span>
+          Réservation confirmée !
+        </div>
+      )}
     </LanguageProvider>
   );
 }

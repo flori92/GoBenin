@@ -1,25 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { getBookings } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
-import { ViewState } from '../types';
+import { ViewState, Booking } from '../types';
 
 interface BookingsProps {
   onChangeView?: (view: ViewState) => void;
+  customBookings?: Booking[];
 }
 
-export const Bookings: React.FC<BookingsProps> = ({ onChangeView }) => {
+export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings = [] }) => {
   const { language, t } = useLanguage();
-  const bookings = getBookings(language);
+  const defaultBookings = getBookings(language);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
 
-  // Simple filtering based on hardcoded status/ids for demo purposes since we lack real date objects
-  // In a real app, compare dates. Here we assume 'Confirmed' is upcoming.
-  const filteredBookings = bookings.filter(b => {
-    if (activeTab === 'upcoming') return b.status === 'Confirmed' || b.status === 'Pending';
-    // We don't have explicit past bookings in mock data, so let's simulate one if 'past' is selected or just show empty state
-    return false; 
-  });
+  // Combine custom bookings with default ones
+  const allBookings = useMemo(() => {
+    return [...customBookings, ...defaultBookings];
+  }, [customBookings, defaultBookings]);
+
+  const filteredBookings = useMemo(() => {
+    return allBookings.filter(b => {
+      if (activeTab === 'upcoming') return b.status === 'Confirmed' || b.status === 'Pending';
+      return b.status === 'Past';
+    });
+  }, [allBookings, activeTab]);
 
   const handleTicketClick = (bookingId: string) => {
     setSelectedTicket(bookingId);
