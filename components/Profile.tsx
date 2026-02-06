@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IMAGES } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useUserProgress, EXPLORER_LEVELS } from '../contexts/UserProgressContext';
 
 interface PaymentMethod {
   id: string;
@@ -16,11 +17,22 @@ interface PaymentMethod {
 export const Profile: React.FC = () => {
   const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const { 
+    trips, reviews, points, badges, 
+    currentLevel, progressToNextLevel,
+    pointsHistory, recentAchievement, clearRecentAchievement
+  } = useUserProgress();
+  
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showPersonalInfo, setShowPersonalInfo] = useState(false);
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showLevelDetails, setShowLevelDetails] = useState(false);
+  const [showBadges, setShowBadges] = useState(false);
+  const [showPointsHistory, setShowPointsHistory] = useState(false);
+  const [showTripsHistory, setShowTripsHistory] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
   
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
     { id: '1', name: 'KKiaPay', type: 'kkiapay', icon: '💳', color: 'bg-blue-500', details: 'Mobile Money & Cards', isDefault: true },
@@ -33,6 +45,10 @@ export const Profile: React.FC = () => {
     phone: '+229 97 00 00 00',
     country: 'Bénin'
   });
+
+  const nextLevel = EXPLORER_LEVELS.find(l => l.level === currentLevel.level + 1);
+  const unlockedBadges = badges.filter(b => b.unlocked);
+  const lockedBadges = badges.filter(b => !b.unlocked);
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
@@ -72,35 +88,117 @@ export const Profile: React.FC = () => {
 
   return (
     <div className={`flex flex-col h-full pb-24 overflow-y-auto transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark' : 'bg-gray-50'}`}>
-      {/* Header Profile Card */}
-      <div className={`relative pb-8 rounded-b-[2.5rem] shadow-lg z-10 ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`}>
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-primary/20 to-primary/5 rounded-b-[2.5rem]"></div>
-        <div className="flex flex-col items-center pt-16 px-6">
-          <div className="relative">
-            <div className="w-28 h-28 rounded-full border-4 border-primary/30 shadow-glow bg-cover bg-center" style={{ backgroundImage: `url('${IMAGES.user}')` }}></div>
-            <button className="absolute bottom-1 right-1 bg-primary text-navy-dark p-2 rounded-full shadow-lg hover:bg-primary-light transition-colors">
-              <span className="material-symbols-outlined text-sm">edit</span>
+      {/* Achievement Toast */}
+      {recentAchievement && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
+          <div className={`px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 ${theme === 'dark' ? 'bg-charcoal-card border border-primary/30' : 'bg-white'}`}>
+            <div className={`w-14 h-14 rounded-xl ${recentAchievement.color} flex items-center justify-center text-3xl`}>
+              {recentAchievement.icon}
+            </div>
+            <div>
+              <p className="text-xs text-primary font-bold uppercase">Nouveau badge !</p>
+              <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{recentAchievement.name}</p>
+              <p className="text-xs text-gray-400">{recentAchievement.description}</p>
+            </div>
+            <button onClick={clearRecentAchievement} className="text-gray-400 hover:text-white ml-2">
+              <span className="material-symbols-outlined">close</span>
             </button>
           </div>
-          <h1 className={`text-2xl font-serif font-bold mt-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{userInfo.name}</h1>
-          <p className="text-gray-400 text-sm">Explorer Level 3 • Benin Lover</p>
-          
-          <div className="flex gap-6 mt-6 w-full justify-center">
-            <div className="flex flex-col items-center">
-              <span className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>12</span>
-              <span className="text-xs text-gray-400 uppercase tracking-wide">Trips</span>
-            </div>
-            <div className={`w-px h-8 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}></div>
-            <div className="flex flex-col items-center">
-              <span className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>45</span>
-              <span className="text-xs text-gray-400 uppercase tracking-wide">Reviews</span>
-            </div>
-            <div className={`w-px h-8 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}></div>
-            <div className="flex flex-col items-center">
-              <span className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>850</span>
-              <span className="text-xs text-gray-400 uppercase tracking-wide">Points</span>
-            </div>
+        </div>
+      )}
+
+      {/* Header Profile Card */}
+      <div className={`relative pb-6 rounded-b-[2.5rem] shadow-lg z-10 ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`}>
+        <div className={`absolute top-0 left-0 w-full h-36 bg-gradient-to-br ${currentLevel.color} opacity-20 rounded-b-[2.5rem]`}></div>
+        <div className="flex flex-col items-center pt-14 px-6">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full border-4 border-primary/30 shadow-glow bg-cover bg-center" style={{ backgroundImage: `url('${IMAGES.user}')` }}></div>
+            <button className="absolute bottom-0 right-0 bg-primary text-navy-dark p-1.5 rounded-full shadow-lg hover:bg-primary-light transition-colors">
+              <span className="material-symbols-outlined text-sm">edit</span>
+            </button>
+            {/* Level badge */}
+            <div className="absolute -top-1 -right-1 text-2xl">{currentLevel.icon}</div>
           </div>
+          <h1 className={`text-xl font-serif font-bold mt-3 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{userInfo.name}</h1>
+          
+          {/* Level & Progress */}
+          <button 
+            onClick={() => setShowLevelDetails(true)}
+            className={`mt-2 px-4 py-1.5 rounded-full flex items-center gap-2 transition-all ${theme === 'dark' ? 'bg-charcoal-light/50 hover:bg-charcoal-light' : 'bg-gray-100 hover:bg-gray-200'}`}
+          >
+            <span className="text-lg">{currentLevel.icon}</span>
+            <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+              {currentLevel.name} • Niveau {currentLevel.level}
+            </span>
+            <span className="material-symbols-outlined text-primary text-[16px]">chevron_right</span>
+          </button>
+          
+          {/* Progress bar */}
+          <div className="w-full max-w-[200px] mt-3">
+            <div className={`h-2 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-charcoal-light' : 'bg-gray-200'}`}>
+              <div 
+                className={`h-full bg-gradient-to-r ${currentLevel.color} transition-all duration-500`}
+                style={{ width: `${Math.min(progressToNextLevel, 100)}%` }}
+              ></div>
+            </div>
+            {nextLevel && (
+              <p className="text-[10px] text-gray-400 text-center mt-1">
+                {points - currentLevel.minPoints} / {nextLevel.minPoints - currentLevel.minPoints} pts vers {nextLevel.name}
+              </p>
+            )}
+          </div>
+          
+          {/* Stats */}
+          <div className="flex gap-4 mt-5 w-full justify-center">
+            <button 
+              onClick={() => setShowTripsHistory(true)}
+              className={`flex flex-col items-center p-3 rounded-xl transition-all ${theme === 'dark' ? 'hover:bg-charcoal-light/30' : 'hover:bg-gray-50'}`}
+            >
+              <span className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{trips.length}</span>
+              <span className="text-[10px] text-gray-400 uppercase tracking-wide">Voyages</span>
+            </button>
+            <div className={`w-px h-12 self-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}></div>
+            <button 
+              onClick={() => setShowReviews(true)}
+              className={`flex flex-col items-center p-3 rounded-xl transition-all ${theme === 'dark' ? 'hover:bg-charcoal-light/30' : 'hover:bg-gray-50'}`}
+            >
+              <span className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{reviews.length}</span>
+              <span className="text-[10px] text-gray-400 uppercase tracking-wide">Avis</span>
+            </button>
+            <div className={`w-px h-12 self-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}></div>
+            <button 
+              onClick={() => setShowPointsHistory(true)}
+              className={`flex flex-col items-center p-3 rounded-xl transition-all ${theme === 'dark' ? 'hover:bg-charcoal-light/30' : 'hover:bg-gray-50'}`}
+            >
+              <span className={`text-2xl font-bold text-primary`}>{points}</span>
+              <span className="text-[10px] text-gray-400 uppercase tracking-wide">Points</span>
+            </button>
+          </div>
+          
+          {/* Badges preview */}
+          <button 
+            onClick={() => setShowBadges(true)}
+            className={`mt-4 w-full p-3 rounded-xl flex items-center justify-between transition-all ${theme === 'dark' ? 'bg-charcoal-light/30 hover:bg-charcoal-light/50' : 'bg-gray-50 hover:bg-gray-100'}`}
+          >
+            <div className="flex items-center gap-2">
+              <div className="flex -space-x-2">
+                {unlockedBadges.slice(0, 4).map((badge, i) => (
+                  <div key={badge.id} className={`w-8 h-8 rounded-full ${badge.color} flex items-center justify-center text-sm border-2 ${theme === 'dark' ? 'border-charcoal-card' : 'border-white'}`}>
+                    {badge.icon}
+                  </div>
+                ))}
+                {unlockedBadges.length > 4 && (
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${theme === 'dark' ? 'bg-charcoal-light border-charcoal-card text-white' : 'bg-gray-200 border-white text-slate-900'}`}>
+                    +{unlockedBadges.length - 4}
+                  </div>
+                )}
+              </div>
+              <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                {unlockedBadges.length} badges débloqués
+              </span>
+            </div>
+            <span className="material-symbols-outlined text-gray-400">chevron_right</span>
+          </button>
         </div>
       </div>
 
@@ -266,7 +364,7 @@ export const Profile: React.FC = () => {
                 ) : (
                   <div className="flex items-center justify-between mt-1">
                     <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{value}</span>
-                    <button onClick={() => handleEditField(key, value)} className="text-primary">
+                    <button onClick={() => handleEditField(key, String(value))} className="text-primary">
                       <span className="material-symbols-outlined text-[20px]">edit</span>
                     </button>
                   </div>
@@ -383,6 +481,238 @@ export const Profile: React.FC = () => {
                 </div>
                 {language === 'en' && <span className="material-symbols-outlined">check</span>}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Level Details Modal */}
+      {showLevelDetails && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowLevelDetails(false)}>
+          <div className={`w-full max-w-lg rounded-t-3xl p-6 pb-10 max-h-[85vh] overflow-y-auto animate-slide-up ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className={`text-xl font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Niveaux Explorer</h2>
+              <button onClick={() => setShowLevelDetails(false)} className="text-gray-400 hover:text-white p-1">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              {EXPLORER_LEVELS.map((level) => {
+                const isCurrentLevel = currentLevel.level === level.level;
+                const isUnlocked = points >= level.minPoints;
+                return (
+                  <div 
+                    key={level.level}
+                    className={`p-4 rounded-xl border-2 transition-all ${
+                      isCurrentLevel 
+                        ? 'border-primary bg-primary/10' 
+                        : isUnlocked 
+                          ? theme === 'dark' ? 'border-white/10 bg-charcoal-light/30' : 'border-gray-200 bg-gray-50'
+                          : 'border-transparent opacity-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${level.color} flex items-center justify-center text-2xl`}>
+                        {level.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                            Niveau {level.level} - {level.name}
+                          </span>
+                          {isCurrentLevel && (
+                            <span className="text-[10px] bg-primary text-navy-dark px-2 py-0.5 rounded-full font-bold">ACTUEL</span>
+                          )}
+                        </div>
+                        <span className="text-xs text-gray-400">
+                          {level.minPoints === 0 ? '0' : level.minPoints.toLocaleString()} - {level.maxPoints === Infinity ? '∞' : level.maxPoints.toLocaleString()} points
+                        </span>
+                      </div>
+                      {isUnlocked && <span className="material-symbols-outlined text-green-500">check_circle</span>}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {level.benefits.map((benefit, i) => (
+                        <span key={i} className={`text-[10px] px-2 py-1 rounded-full ${theme === 'dark' ? 'bg-charcoal-light text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                          {benefit}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Badges Modal */}
+      {showBadges && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowBadges(false)}>
+          <div className={`w-full max-w-lg rounded-t-3xl p-6 pb-10 max-h-[85vh] overflow-y-auto animate-slide-up ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className={`text-xl font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Mes Badges</h2>
+              <button onClick={() => setShowBadges(false)} className="text-gray-400 hover:text-white p-1">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <h3 className={`text-sm font-bold uppercase tracking-wider mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              Débloqués ({unlockedBadges.length})
+            </h3>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {unlockedBadges.map(badge => (
+                <div key={badge.id} className={`p-3 rounded-xl text-center ${theme === 'dark' ? 'bg-charcoal-light/30' : 'bg-gray-50'}`}>
+                  <div className={`w-14 h-14 mx-auto rounded-xl ${badge.color} flex items-center justify-center text-2xl mb-2`}>
+                    {badge.icon}
+                  </div>
+                  <p className={`text-xs font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{badge.name}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">{badge.description}</p>
+                </div>
+              ))}
+            </div>
+            
+            {lockedBadges.length > 0 && (
+              <>
+                <h3 className={`text-sm font-bold uppercase tracking-wider mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  À débloquer ({lockedBadges.length})
+                </h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {lockedBadges.map(badge => (
+                    <div key={badge.id} className={`p-3 rounded-xl text-center opacity-50 ${theme === 'dark' ? 'bg-charcoal-light/30' : 'bg-gray-50'}`}>
+                      <div className={`w-14 h-14 mx-auto rounded-xl bg-gray-500 flex items-center justify-center text-2xl mb-2 grayscale`}>
+                        {badge.icon}
+                      </div>
+                      <p className={`text-xs font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{badge.name}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{badge.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Points History Modal */}
+      {showPointsHistory && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowPointsHistory(false)}>
+          <div className={`w-full max-w-lg rounded-t-3xl p-6 pb-10 max-h-[85vh] overflow-y-auto animate-slide-up ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className={`text-xl font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Mes Points</h2>
+                <p className="text-primary text-2xl font-bold">{points} pts</p>
+              </div>
+              <button onClick={() => setShowPointsHistory(false)} className="text-gray-400 hover:text-white p-1">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className={`p-4 rounded-xl mb-4 ${theme === 'dark' ? 'bg-primary/10 border border-primary/30' : 'bg-yellow-50 border border-yellow-200'}`}>
+              <p className="text-sm text-gray-300">
+                💡 Gagnez des points en voyageant (+50 pts), en laissant des avis (+25 pts) et en réservant (+100 pts) !
+              </p>
+            </div>
+            
+            <h3 className={`text-sm font-bold uppercase tracking-wider mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              Historique
+            </h3>
+            <div className="space-y-2">
+              {[...pointsHistory].reverse().map((entry, i) => (
+                <div key={i} className={`p-3 rounded-xl flex items-center justify-between ${theme === 'dark' ? 'bg-charcoal-light/30' : 'bg-gray-50'}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[20px]">add</span>
+                    </div>
+                    <div>
+                      <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{entry.reason}</p>
+                      <p className="text-[10px] text-gray-400">{new Date(entry.date).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                  </div>
+                  <span className="text-primary font-bold">+{entry.amount}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Trips History Modal */}
+      {showTripsHistory && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowTripsHistory(false)}>
+          <div className={`w-full max-w-lg rounded-t-3xl p-6 pb-10 max-h-[85vh] overflow-y-auto animate-slide-up ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className={`text-xl font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Mes Voyages</h2>
+                <p className="text-gray-400 text-sm">{trips.length} destinations visitées</p>
+              </div>
+              <button onClick={() => setShowTripsHistory(false)} className="text-gray-400 hover:text-white p-1">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              {trips.map(trip => (
+                <div key={trip.id} className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-charcoal-light/30' : 'bg-gray-50'}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center text-3xl">
+                      🗺️
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{trip.name}</p>
+                      <p className="text-xs text-gray-400">{trip.location}</p>
+                      <p className="text-[10px] text-gray-500 mt-1">{new Date(trip.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    </div>
+                    {trip.reviewed ? (
+                      <span className="text-green-500 text-[10px] flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">check</span> Avis laissé
+                      </span>
+                    ) : (
+                      <button className="text-primary text-xs font-semibold">Laisser un avis</button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reviews Modal */}
+      {showReviews && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowReviews(false)}>
+          <div className={`w-full max-w-lg rounded-t-3xl p-6 pb-10 max-h-[85vh] overflow-y-auto animate-slide-up ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className={`text-xl font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Mes Avis</h2>
+                <p className="text-gray-400 text-sm">{reviews.length} avis publiés</p>
+              </div>
+              <button onClick={() => setShowReviews(false)} className="text-gray-400 hover:text-white p-1">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              {reviews.map(review => (
+                <div key={review.id} className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-charcoal-light/30' : 'bg-gray-50'}`}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{review.locationName}</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className={`material-symbols-outlined text-[16px] ${i < review.rating ? 'text-primary fill-1' : 'text-gray-400'}`}>star</span>
+                        ))}
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-gray-400">{new Date(review.date).toLocaleDateString('fr-FR')}</span>
+                  </div>
+                  <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>"{review.comment}"</p>
+                  <div className="flex items-center gap-2 mt-2 text-gray-400 text-xs">
+                    <span className="material-symbols-outlined text-[14px]">thumb_up</span>
+                    {review.likes} personnes ont trouvé cet avis utile
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
