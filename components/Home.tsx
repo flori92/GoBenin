@@ -13,14 +13,27 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
   const heritage = getHeritageSites(language);
   const nearby = getNearbyActivities(language);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   return (
     <div className="relative flex flex-col w-full pb-32 bg-background-dark text-gray-200">
       {/* Immersive Video Header Section */}
-      <div className="relative w-full h-[50vh] min-h-[420px]">
-        <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${IMAGES.hero}')` }}></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-navy-dark/40 to-background-dark"></div>
+      <div className="relative w-full h-[50vh] min-h-[420px] overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 w-full h-full">
+          <iframe 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180%] h-[180%] md:w-[120%] md:h-[120%] pointer-events-none"
+            src={`https://www.youtube.com/embed/zfE-384HTFc?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=zfE-384HTFc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+            title="Découvrez le Bénin"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+        {/* Fallback image for slow connections */}
+        <div className="absolute inset-0 w-full h-full bg-cover bg-center -z-10" style={{ backgroundImage: `url('${IMAGES.hero}')` }}></div>
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-navy-dark/50 to-background-dark z-[1]"></div>
         
         {/* Top Bar */}
         <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10 pt-14">
@@ -72,15 +85,15 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
           </div>
         </div>
 
-        {/* Play Button */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        {/* Sound Toggle Button */}
+        <div className="absolute bottom-6 right-6 z-10">
           <button 
-            onClick={() => setShowVideo(true)}
-            className="w-20 h-20 rounded-full bg-charcoal-dark/40 backdrop-blur-sm border-2 border-primary/60 flex items-center justify-center shadow-gold hover:scale-110 transition-transform cursor-pointer group"
+            onClick={() => setIsMuted(!isMuted)}
+            className="w-12 h-12 rounded-full bg-charcoal-dark/60 backdrop-blur-sm border border-primary/40 flex items-center justify-center shadow-lg hover:bg-primary hover:text-navy-dark transition-all group"
           >
-            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-navy-dark pl-1 group-hover:bg-primary-light transition-colors">
-              <span className="material-symbols-outlined !text-4xl fill-1">play_arrow</span>
-            </div>
+            <span className="material-symbols-outlined text-white group-hover:text-navy-dark">
+              {isMuted ? 'volume_off' : 'volume_up'}
+            </span>
           </button>
         </div>
 
@@ -196,32 +209,6 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
       </section>
       <div className="h-8"></div>
 
-      {/* Video Modal - Outside all containers for proper z-index */}
-      {showVideo && (
-        <div 
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95"
-          onClick={() => setShowVideo(false)}
-        >
-          <div className="relative w-full max-w-4xl mx-4 aspect-video" onClick={e => e.stopPropagation()}>
-            <button 
-              onClick={() => setShowVideo(false)}
-              className="absolute -top-12 right-0 text-white hover:text-primary transition-colors flex items-center gap-2 z-10"
-            >
-              <span className="text-sm">Fermer</span>
-              <span className="material-symbols-outlined">close</span>
-            </button>
-            <iframe 
-              className="w-full h-full rounded-2xl shadow-2xl"
-              src="https://www.youtube.com/embed/zfE-384HTFc?si=URITLRFoZrJJxSiY&autoplay=1" 
-              title="Découvrez le Bénin" 
-              frameBorder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-              referrerPolicy="strict-origin-when-cross-origin" 
-              allowFullScreen
-            ></iframe>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
