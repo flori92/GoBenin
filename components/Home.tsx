@@ -39,7 +39,6 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
         <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10 pt-14">
           <div className="flex flex-col">
             <span className="text-primary text-[11px] font-bold tracking-[0.25em] uppercase mb-2 border-l-2 border-primary pl-2">{t('welcome_msg')}</span>
-            <h1 className="text-white text-4xl font-serif font-medium leading-[1.1] drop-shadow-xl">{t('explore_soul')} <br/><span className="text-gold-gradient italic pr-1">{t('heritage')}</span> of Africa</h1>
           </div>
           <div className="flex items-center gap-2 relative">
             <button 
