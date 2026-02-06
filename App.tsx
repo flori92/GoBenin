@@ -12,6 +12,7 @@ import { BookingModal, BookingData } from './components/BookingModal';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { UserProgressProvider } from './contexts/UserProgressContext';
+import { AuthProvider } from './contexts/AuthContext';
 
 export default function App() {
   const [view, setView] = useState<ViewState>('SPLASH');
@@ -89,8 +90,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <UserProgressProvider>
-          <Content />
+        <AuthProvider>
+          <UserProgressProvider>
+            <Content />
           
           {/* Booking Modal */}
           {bookingItem && (
@@ -108,7 +110,8 @@ export default function App() {
               Réservation confirmée !
             </div>
           )}
-        </UserProgressProvider>
+          </UserProgressProvider>
+        </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
   );
