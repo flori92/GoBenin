@@ -68,7 +68,11 @@ const translations: Record<Language, Record<string, string>> = {
     weeks: "weeks",
     day: "Day",
     days: "Days",
-    welcome_msg: "Welcome to Benin"
+    welcome_msg: "Welcome to Benin",
+    no_results: "No results found",
+    try_another: "Try another search term",
+    results: "result(s)",
+    heritage: "Heritage"
   },
   fr: {
     welcome: "Bienvenue au Bénin",
@@ -98,6 +102,10 @@ const translations: Record<Language, Record<string, string>> = {
     discover_new: "Découvrez de nouveaux sites et circuits.",
     explore_circuits: "Explorer les Circuits",
     splash_loading: "Chargement...",
+    no_results: "Aucun résultat trouvé",
+    try_another: "Essayez un autre terme",
+    results: "résultat(s)",
+    heritage: "Patrimoine",
     splash_text: "Bénin, un monde de splendeurs",
     price_per_person: "Prix par personne",
     book_visit: "Réserver",

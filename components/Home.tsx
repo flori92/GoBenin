@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { IMAGES, getFeaturedDestinations, getHeritageSites, getNearbyActivities } from '../constants';
 import { Location } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -14,6 +14,38 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
   const nearby = getNearbyActivities(language);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  // Combine all locations for search
+  const allLocations = useMemo(() => [
+    ...featured,
+    ...heritage,
+    ...nearby
+  ], [featured, heritage, nearby]);
+
+  // Filter locations based on search query
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return allLocations.filter(loc => 
+      loc.name.toLowerCase().includes(query) ||
+      loc.subtitle?.toLowerCase().includes(query) ||
+      loc.description?.toLowerCase().includes(query) ||
+      loc.category?.toLowerCase().includes(query)
+    );
+  }, [searchQuery, allLocations]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setShowSearchResults(e.target.value.length > 0);
+  };
+
+  const handleSelectFromSearch = (location: Location) => {
+    setSearchQuery('');
+    setShowSearchResults(false);
+    onSelectLocation(location);
+  };
 
   return (
     <div className="relative flex flex-col w-full pb-32 bg-background-dark text-gray-200">
@@ -106,12 +138,68 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
             className="w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-white placeholder:text-gray-500 h-11 font-serif tracking-wide" 
             placeholder={t('search_placeholder')}
             type="text"
+            value={searchQuery}
+            onChange={handleSearch}
+            onFocus={() => searchQuery && setShowSearchResults(true)}
           />
+          {searchQuery && (
+            <button 
+              onClick={() => { setSearchQuery(''); setShowSearchResults(false); }}
+              className="text-gray-400 hover:text-white p-2"
+            >
+              <span className="material-symbols-outlined text-sm">close</span>
+            </button>
+          )}
           <button className="bg-primary text-navy-dark w-11 h-11 rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 hover:bg-primary-light transition-colors">
             <span className="material-symbols-outlined">tune</span>
           </button>
         </div>
+
+        {/* Search Results Dropdown */}
+        {showSearchResults && (
+          <div className="absolute top-full left-6 right-6 mt-2 bg-charcoal-card/95 backdrop-blur-xl rounded-xl shadow-2xl border border-primary/20 max-h-80 overflow-y-auto z-50">
+            {searchResults.length > 0 ? (
+              <div className="p-2">
+                <p className="text-xs text-gray-500 px-3 py-2">{searchResults.length} {t('results') || 'résultat(s)'}</p>
+                {searchResults.map((result) => (
+                  <div
+                    key={result.id}
+                    onClick={() => handleSelectFromSearch(result)}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 cursor-pointer transition-colors"
+                  >
+                    <div 
+                      className="w-12 h-12 rounded-lg bg-cover bg-center shrink-0"
+                      style={{ backgroundImage: `url('${result.image}')` }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-white font-medium truncate">{result.name}</h4>
+                      <p className="text-xs text-gray-400 truncate">{result.subtitle}</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-primary">
+                      <span className="material-symbols-outlined text-sm">star</span>
+                      <span className="text-xs font-bold">{result.rating}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 text-center">
+                <span className="material-symbols-outlined text-4xl text-gray-600 mb-2">search_off</span>
+                <p className="text-gray-400 text-sm">{t('no_results') || 'Aucun résultat trouvé'}</p>
+                <p className="text-gray-500 text-xs mt-1">{t('try_another') || 'Essayez un autre terme'}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Overlay to close search */}
+      {showSearchResults && (
+        <div 
+          className="fixed inset-0 z-10" 
+          onClick={() => setShowSearchResults(false)}
+        />
+      )}
 
       {/* Curated Journeys */}
       <section className="mt-12">
