@@ -84,32 +84,6 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
           </button>
         </div>
 
-        {/* Video Modal */}
-        {showVideo && (
-          <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
-            onClick={() => setShowVideo(false)}
-          >
-            <div className="relative w-full max-w-4xl mx-4 aspect-video" onClick={e => e.stopPropagation()}>
-              <button 
-                onClick={() => setShowVideo(false)}
-                className="absolute -top-12 right-0 text-white hover:text-primary transition-colors flex items-center gap-2"
-              >
-                <span className="text-sm">Fermer</span>
-                <span className="material-symbols-outlined">close</span>
-              </button>
-              <iframe 
-                className="w-full h-full rounded-2xl shadow-2xl"
-                src="https://www.youtube.com/embed/zfE-384HTFc?si=URITLRFoZrJJxSiY&autoplay=1" 
-                title="Découvrez le Bénin" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                referrerPolicy="strict-origin-when-cross-origin" 
-                allowFullScreen
-              ></iframe>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Floating Search Bar */}
@@ -221,6 +195,33 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
         </div>
       </section>
       <div className="h-8"></div>
+
+      {/* Video Modal - Outside all containers for proper z-index */}
+      {showVideo && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95"
+          onClick={() => setShowVideo(false)}
+        >
+          <div className="relative w-full max-w-4xl mx-4 aspect-video" onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setShowVideo(false)}
+              className="absolute -top-12 right-0 text-white hover:text-primary transition-colors flex items-center gap-2 z-10"
+            >
+              <span className="text-sm">Fermer</span>
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <iframe 
+              className="w-full h-full rounded-2xl shadow-2xl"
+              src="https://www.youtube.com/embed/zfE-384HTFc?si=URITLRFoZrJJxSiY&autoplay=1" 
+              title="Découvrez le Bénin" 
+              frameBorder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              referrerPolicy="strict-origin-when-cross-origin" 
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
