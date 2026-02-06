@@ -3,6 +3,8 @@ import { IMAGES } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useUserProgress, EXPLORER_LEVELS } from '../contexts/UserProgressContext';
+import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from './AuthModal';
 
 interface PaymentMethod {
   id: string;
@@ -22,8 +24,10 @@ export const Profile: React.FC = () => {
     currentLevel, progressToNextLevel,
     pointsHistory, recentAchievement, clearRecentAchievement
   } = useUserProgress();
+  const { user, profile, signOut, loading: authLoading } = useAuth();
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPersonalInfo, setShowPersonalInfo] = useState(false);
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
@@ -40,11 +44,23 @@ export const Profile: React.FC = () => {
   ]);
 
   const [userInfo, setUserInfo] = useState({
-    name: 'Sarah Jenkins',
-    email: 'sarah.jenkins@email.com',
-    phone: '+229 97 00 00 00',
-    country: 'Bénin'
+    name: profile?.name || 'Utilisateur',
+    email: user?.email || 'non connecté',
+    phone: profile?.phone || '+229 XX XX XX XX',
+    country: profile?.country || 'Bénin'
   });
+
+  // Mettre à jour userInfo quand le profil change
+  useEffect(() => {
+    if (profile) {
+      setUserInfo({
+        name: profile.name || 'Utilisateur',
+        email: user?.email || 'non connecté',
+        phone: profile.phone || '+229 XX XX XX XX',
+        country: profile.country || 'Bénin'
+      });
+    }
+  }, [profile, user]);
 
   const nextLevel = EXPLORER_LEVELS.find(l => l.level === currentLevel.level + 1);
   const unlockedBadges = badges.filter(b => b.unlocked);
@@ -119,7 +135,17 @@ export const Profile: React.FC = () => {
             {/* Level badge */}
             <div className="absolute -top-1 -right-1 text-2xl">{currentLevel.icon}</div>
           </div>
-          <h1 className={`text-xl font-serif font-bold mt-3 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{userInfo.name}</h1>
+          <h1 className={`text-xl font-serif font-bold mt-3 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+            {user ? userInfo.name : 'Bienvenue'}
+          </h1>
+          {!user && (
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="mt-2 px-6 py-2 bg-primary text-navy-dark rounded-full font-bold shadow-glow hover:bg-primary-light transition-colors"
+            >
+              Se connecter
+            </button>
+          )}
           
           {/* Level & Progress */}
           <button 
@@ -759,7 +785,13 @@ export const Profile: React.FC = () => {
                 >
                   Annuler
                 </button>
-                <button className="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors">
+                <button 
+                  onClick={async () => {
+                    await signOut();
+                    setShowLogoutConfirm(false);
+                  }}
+                  className="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors"
+                >
                   Déconnecter
                 </button>
               </div>
@@ -767,6 +799,12 @@ export const Profile: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
     </div>
   );
 };

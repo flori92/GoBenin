@@ -3,6 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qdueesyzwcpjwtmninez.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
+if (import.meta.env.DEV && !supabaseAnonKey) {
+  console.warn('[GoBenin] Missing VITE_SUPABASE_ANON_KEY. Auth and data calls will fail.');
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Types pour les données GoBénin

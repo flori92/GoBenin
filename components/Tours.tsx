@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { getTours } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -16,10 +16,17 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('gobenin-favorites');
+    return saved ? new Set<string>(JSON.parse(saved)) : new Set();
+  });
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
   const [sortBy, setSortBy] = useState<'rating' | 'price' | 'duration'>('rating');
+
+  useEffect(() => {
+    localStorage.setItem('gobenin-favorites', JSON.stringify(Array.from(favorites)));
+  }, [favorites]);
 
   const filters = [
     { id: 'all', label: t('all'), icon: 'temple_buddhist' },

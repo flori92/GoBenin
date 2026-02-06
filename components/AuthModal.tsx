@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
   const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
   const { t } = useLanguage();
+  const { theme } = useTheme();
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -63,7 +65,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative bg-charcoal-card rounded-2xl shadow-2xl w-full max-w-md p-6 border border-primary/20 animation-fade-in-up">
+      <div className={`relative rounded-2xl shadow-2xl w-full max-w-md p-6 border border-primary/20 animation-fade-in-up ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`}>
         {/* Close button */}
         <button 
           onClick={onClose}
@@ -79,7 +81,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               {mode === 'forgot' ? 'lock_reset' : 'person'}
             </span>
           </div>
-          <h2 className="text-2xl font-serif text-white">
+          <h2 className={`text-2xl font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
             {mode === 'login' && 'Connexion'}
             {mode === 'signup' && 'Créer un compte'}
             {mode === 'forgot' && 'Mot de passe oublié'}
@@ -112,7 +114,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-charcoal-dark border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                className={`w-full border rounded-lg px-4 py-3 placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors ${theme === 'dark' ? 'bg-charcoal-dark border-white/10 text-white' : 'bg-gray-50 border-gray-200 text-slate-900'}`}
                 placeholder="Votre nom"
               />
             </div>
@@ -125,7 +127,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-charcoal-dark border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+              className={`w-full border rounded-lg px-4 py-3 placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors ${theme === 'dark' ? 'bg-charcoal-dark border-white/10 text-white' : 'bg-gray-50 border-gray-200 text-slate-900'}`}
               placeholder="vous@email.com"
             />
           </div>
@@ -139,7 +141,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full bg-charcoal-dark border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                className={`w-full border rounded-lg px-4 py-3 placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors ${theme === 'dark' ? 'bg-charcoal-dark border-white/10 text-white' : 'bg-gray-50 border-gray-200 text-slate-900'}`}
                 placeholder="••••••••"
               />
             </div>

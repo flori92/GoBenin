@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewState, Location, Tour, Booking } from './types';
 import { Home } from './components/Home';
 import { Navigation } from './components/Navigation';
@@ -18,8 +18,15 @@ export default function App() {
   const [view, setView] = useState<ViewState>('SPLASH');
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [bookingItem, setBookingItem] = useState<Tour | Location | null>(null);
-  const [userBookings, setUserBookings] = useState<Booking[]>([]);
+  const [userBookings, setUserBookings] = useState<Booking[]>(() => {
+    const saved = localStorage.getItem('gobenin-bookings');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('gobenin-bookings', JSON.stringify(userBookings));
+  }, [userBookings]);
 
   const handleSplashFinish = () => {
     setView('HOME');

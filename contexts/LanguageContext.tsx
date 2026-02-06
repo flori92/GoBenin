@@ -72,7 +72,8 @@ const translations: Record<Language, Record<string, string>> = {
     no_results: "No results found",
     try_another: "Try another search term",
     results: "result(s)",
-    heritage: "Heritage"
+    heritage: "Heritage",
+    found: "found"
   },
   fr: {
     welcome: "Bienvenue au Bénin",
@@ -137,14 +138,29 @@ const translations: Record<Language, Record<string, string>> = {
     weeks: "semaines",
     day: "Jour",
     days: "Jours",
-    welcome_msg: "Bienvenue au Bénin"
+    welcome_msg: "Bienvenue au Bénin",
+    found: "trouvé(s)"
   }
 };
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+const STORAGE_KEY = 'gobenin-language';
+
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>(() => {
+    if (typeof window === 'undefined') return 'en';
+    const saved = localStorage.getItem(STORAGE_KEY) as Language | null;
+    if (saved === 'en' || saved === 'fr') return saved;
+    const browserLang = navigator.language.toLowerCase();
+    return browserLang.startsWith('fr') ? 'fr' : 'en';
+  });
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, language);
+    }
+  }, [language]);
 
   const t = (key: string) => {
     return translations[language][key] || key;

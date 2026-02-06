@@ -20,6 +20,25 @@ const LOCATIONS_COORDS: Record<string, { lat: number; lng: number; icon: string 
 };
 
 const BENIN_CENTER = { lat: 9.3, lng: 2.3 };
+const MAP_BOUNDS = { latMin: 5.5, latMax: 12.5, lngMin: 0.5, lngMax: 4 };
+
+const hashString = (value: string) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+};
+
+const getStableCoords = (id: string) => {
+  const hash = hashString(id);
+  const latRange = MAP_BOUNDS.latMax - MAP_BOUNDS.latMin;
+  const lngRange = MAP_BOUNDS.lngMax - MAP_BOUNDS.lngMin;
+  const lat = MAP_BOUNDS.latMin + (hash % 1000) / 1000 * latRange;
+  const lng = MAP_BOUNDS.lngMin + ((hash / 1000) % 1000) / 1000 * lngRange;
+  return { lat, lng, icon: 'location_on' };
+};
 
 export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) => {
   const { t, language } = useLanguage();
@@ -45,7 +64,7 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
       index === self.findIndex(l => l.id === loc.id)
     ).map(loc => ({
       ...loc,
-      coords: LOCATIONS_COORDS[loc.id] || { lat: 6.5 + Math.random(), lng: 2 + Math.random(), icon: 'location_on' }
+      coords: LOCATIONS_COORDS[loc.id] || getStableCoords(loc.id)
     }));
   }, [featured, heritageSites, nearby]);
 
@@ -114,9 +133,8 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
   // Convert lat/lng to pixel position on the map
   const getMarkerPosition = (lat: number, lng: number) => {
     // Benin bounds approximately: lat 6-12, lng 0.8-3.8
-    const latMin = 5.5, latMax = 12.5, lngMin = 0.5, lngMax = 4;
-    const x = ((lng - lngMin) / (lngMax - lngMin)) * 100;
-    const y = ((latMax - lat) / (latMax - latMin)) * 100;
+    const x = ((lng - MAP_BOUNDS.lngMin) / (MAP_BOUNDS.lngMax - MAP_BOUNDS.lngMin)) * 100;
+    const y = ((MAP_BOUNDS.latMax - lat) / (MAP_BOUNDS.latMax - MAP_BOUNDS.latMin)) * 100;
     return { x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) };
   };
 

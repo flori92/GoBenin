@@ -17,6 +17,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Leaflet base */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
 /* Material Icons fill variant */
 .material-symbols-outlined.fill-1 {
   font-variation-settings: 'FILL' 1;

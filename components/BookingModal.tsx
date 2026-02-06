@@ -32,7 +32,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
 
   if (!item) return null;
 
-  const price = 'price' in item ? (typeof item.price === 'number' ? item.price : parseInt(item.price) || 45) : 45;
+  const parsePrice = (value: unknown) => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+      const digitsOnly = value.replace(/[^\d]/g, '');
+      if (digitsOnly) return parseInt(digitsOnly, 10);
+    }
+    return 45;
+  };
+
+  const price = 'price' in item ? parsePrice(item.price) : 45;
   const totalPrice = price * guests;
 
   // Calendar helpers
