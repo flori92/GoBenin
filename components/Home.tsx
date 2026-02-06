@@ -13,6 +13,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
   const heritage = getHeritageSites(language);
   const nearby = getNearbyActivities(language);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   return (
     <div className="relative flex flex-col w-full pb-32 bg-background-dark text-gray-200">
@@ -72,13 +73,43 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
         </div>
 
         {/* Play Button */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-16 h-16 rounded-full bg-charcoal-dark/30 backdrop-blur-sm border border-primary/50 flex items-center justify-center shadow-gold animate-pulse">
-            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-navy-dark pl-1">
-              <span className="material-symbols-outlined !text-3xl fill-1">play_arrow</span>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <button 
+            onClick={() => setShowVideo(true)}
+            className="w-20 h-20 rounded-full bg-charcoal-dark/40 backdrop-blur-sm border-2 border-primary/60 flex items-center justify-center shadow-gold hover:scale-110 transition-transform cursor-pointer group"
+          >
+            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-navy-dark pl-1 group-hover:bg-primary-light transition-colors">
+              <span className="material-symbols-outlined !text-4xl fill-1">play_arrow</span>
+            </div>
+          </button>
+        </div>
+
+        {/* Video Modal */}
+        {showVideo && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+            onClick={() => setShowVideo(false)}
+          >
+            <div className="relative w-full max-w-4xl mx-4 aspect-video" onClick={e => e.stopPropagation()}>
+              <button 
+                onClick={() => setShowVideo(false)}
+                className="absolute -top-12 right-0 text-white hover:text-primary transition-colors flex items-center gap-2"
+              >
+                <span className="text-sm">Fermer</span>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+              <iframe 
+                className="w-full h-full rounded-2xl shadow-2xl"
+                src="https://www.youtube.com/embed/zfE-384HTFc?si=URITLRFoZrJJxSiY&autoplay=1" 
+                title="Découvrez le Bénin" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerPolicy="strict-origin-when-cross-origin" 
+                allowFullScreen
+              ></iframe>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Floating Search Bar */}
