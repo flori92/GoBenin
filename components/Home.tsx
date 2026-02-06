@@ -16,6 +16,13 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
   const [isMuted, setIsMuted] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [nearbyFilter, setNearbyFilter] = useState<'all' | 'Food' | 'Hotel'>('all');
+
+  // Filter nearby activities based on selected filter
+  const filteredNearby = useMemo(() => {
+    if (nearbyFilter === 'all') return nearby;
+    return nearby.filter(activity => activity.category === nearbyFilter);
+  }, [nearby, nearbyFilter]);
 
   // Combine all locations for search
   const allLocations = useMemo(() => [
@@ -263,13 +270,22 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-serif font-medium text-white">{t('nearby')}</h2>
           <div className="flex gap-2">
-            <button className="bg-primary text-navy-dark px-4 py-1.5 rounded-full text-xs font-bold shadow-glow border border-primary">{t('all')}</button>
-            <button className="bg-transparent border border-white/10 text-gray-400 hover:text-primary hover:border-primary/50 px-4 py-1.5 rounded-full text-xs font-medium transition-colors">{t('food')}</button>
-            <button className="bg-transparent border border-white/10 text-gray-400 hover:text-primary hover:border-primary/50 px-4 py-1.5 rounded-full text-xs font-medium transition-colors">{t('hotels')}</button>
+            <button 
+              onClick={() => setNearbyFilter('all')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${nearbyFilter === 'all' ? 'bg-primary text-navy-dark shadow-glow border border-primary' : 'bg-transparent border border-white/10 text-gray-400 hover:text-primary hover:border-primary/50'}`}
+            >{t('all')}</button>
+            <button 
+              onClick={() => setNearbyFilter('Food')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${nearbyFilter === 'Food' ? 'bg-primary text-navy-dark shadow-glow border border-primary' : 'bg-transparent border border-white/10 text-gray-400 hover:text-primary hover:border-primary/50'}`}
+            >{t('food')}</button>
+            <button 
+              onClick={() => setNearbyFilter('Hotel')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${nearbyFilter === 'Hotel' ? 'bg-primary text-navy-dark shadow-glow border border-primary' : 'bg-transparent border border-white/10 text-gray-400 hover:text-primary hover:border-primary/50'}`}
+            >{t('hotels')}</button>
           </div>
         </div>
         <div className="flex flex-col gap-5">
-          {nearby.map((activity) => (
+          {filteredNearby.map((activity) => (
             <div key={activity.id} className="flex gap-4 p-3 rounded-2xl bg-charcoal-card border border-white/5 shadow-lg items-center relative overflow-hidden group hover:border-primary/30 transition-all cursor-pointer" onClick={() => onSelectLocation(activity)}>
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full pointer-events-none"></div>
               <div className="w-24 h-24 rounded-xl bg-cover bg-center shrink-0 shadow-inner border border-white/5" style={{ backgroundImage: `url('${activity.image}')` }}></div>
