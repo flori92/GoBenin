@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Tour, Location } from '../types';
 
 interface BookingModalProps {
@@ -22,6 +23,7 @@ const AVAILABLE_TIMES = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
 
 export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onConfirm }) => {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -108,7 +110,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
         >
           <span className="material-symbols-outlined">chevron_left</span>
         </button>
-        <h3 className="text-lg font-serif text-white">
+        <h3 className={`text-lg font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </h3>
         <button 
@@ -260,12 +262,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div 
-        className="w-full max-w-lg bg-charcoal-card rounded-t-3xl p-6 pb-10 max-h-[85vh] overflow-y-auto animate-slide-up"
+        className={`w-full max-w-lg rounded-t-3xl p-6 pb-10 max-h-[85vh] overflow-y-auto animate-slide-up ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-serif text-white">
+          <h2 className={`text-xl font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
             {step === 'date' && 'Choisir une date'}
             {step === 'time' && 'Choisir un horaire'}
             {step === 'confirm' && 'Confirmer'}

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { IMAGES, getHeritageSites, getFeaturedDestinations, getNearbyActivities } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Location } from '../types';
 
 interface MapExplorerProps {
@@ -22,6 +23,7 @@ const BENIN_CENTER = { lat: 9.3, lng: 2.3 };
 
 export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) => {
   const { t, language } = useLanguage();
+  const { theme } = useTheme();
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
@@ -121,7 +123,7 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
   const selectedLocation = filteredLocations.find(loc => loc.id === selectedMarker);
 
   return (
-    <div className="h-screen w-full overflow-hidden flex flex-col relative bg-background-dark">
+    <div className={`h-screen w-full overflow-hidden flex flex-col relative transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark' : 'bg-gray-50'}`}>
       {/* Interactive Map Layer with OpenStreetMap */}
       <div className="absolute inset-0 z-0 w-full h-full">
         <iframe
@@ -184,12 +186,12 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
       </div>
 
       {/* Top Search Area */}
-      <div className="relative z-20 pt-12 px-4 pb-4 w-full bg-gradient-to-b from-background-dark via-background-dark/80 to-transparent">
+      <div className={`relative z-20 pt-12 px-4 pb-4 w-full bg-gradient-to-b to-transparent ${theme === 'dark' ? 'from-background-dark via-background-dark/80' : 'from-gray-50 via-gray-50/80'}`}>
         <div className="flex flex-col gap-3 max-w-md mx-auto w-full">
-          <div className="flex w-full items-center h-12 rounded-xl bg-charcoal-card/90 backdrop-blur-xl shadow-lg border border-primary/20">
+          <div className={`flex w-full items-center h-12 rounded-xl backdrop-blur-xl shadow-lg border border-primary/20 ${theme === 'dark' ? 'bg-charcoal-card/90' : 'bg-white/90'}`}>
             <div className="flex items-center justify-center pl-4 text-primary"><span className="material-symbols-outlined">search</span></div>
             <input 
-              className="w-full bg-transparent border-none text-white placeholder:text-gray-500 focus:ring-0 text-base font-medium px-3" 
+              className={`w-full bg-transparent border-none placeholder:text-gray-500 focus:ring-0 text-base font-medium px-3 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`} 
               placeholder={t('search_tours')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -208,7 +210,7 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full shadow-sm whitespace-nowrap text-sm font-medium transition-all ${
                   activeFilter === filter.id 
                     ? 'bg-primary text-navy-dark font-bold shadow-glow' 
-                    : 'bg-charcoal-card/80 text-gray-300 border border-white/10 hover:border-primary/50'
+                    : `${theme === 'dark' ? 'bg-charcoal-card/80 text-gray-300 border-white/10' : 'bg-white/80 text-gray-600 border-gray-300'} border hover:border-primary/50`
                 }`}
               >
                 <span className="material-symbols-outlined text-lg">{filter.icon}</span> {filter.label}
