@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { IMAGES } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { useUserProgress, EXPLORER_LEVELS } from '../contexts/UserProgressContext';
+import { useUserProgress } from '../contexts/UserProgressContext';
 
 interface PaymentMethod {
   id: string;
@@ -20,6 +20,7 @@ export const Profile: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { 
     trips, reviews, points, badges, 
+    levels,
     currentLevel, progressToNextLevel,
     pointsHistory, recentAchievement, clearRecentAchievement
   } = useUserProgress();
@@ -47,7 +48,7 @@ export const Profile: React.FC = () => {
     country: 'Bénin'
   });
 
-  const nextLevel = EXPLORER_LEVELS.find(l => l.level === currentLevel.level + 1);
+  const nextLevel = levels.find(l => l.level === currentLevel.level + 1);
   const unlockedBadges = badges.filter(b => b.unlocked);
   const lockedBadges = badges.filter(b => !b.unlocked);
   const dateLocale = language === 'fr' ? 'fr-FR' : 'en-US';
@@ -528,7 +529,7 @@ export const Profile: React.FC = () => {
             </div>
             
             <div className="space-y-3">
-              {EXPLORER_LEVELS.map((level) => {
+              {levels.map((level) => {
                 const isCurrentLevel = currentLevel.level === level.level;
                 const isUnlocked = points >= level.minPoints;
                 return (
@@ -645,7 +646,7 @@ export const Profile: React.FC = () => {
             </div>
             
             <h3 className={`text-sm font-bold uppercase tracking-wider mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              {t('history')}
+              {t('points_history')}
             </h3>
             <div className="space-y-2">
               {[...pointsHistory].reverse().map((entry, i) => (

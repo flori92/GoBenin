@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
+import { useLanguage } from './LanguageContext';
 
 export interface Badge {
   id: string;
@@ -42,24 +43,45 @@ export interface ExplorerLevel {
   benefits: string[];
 }
 
-const EXPLORER_LEVELS: ExplorerLevel[] = [
-  { level: 1, name: 'Débutant', minPoints: 0, maxPoints: 199, icon: '🌱', color: 'from-green-400 to-green-600', benefits: ['Accès aux circuits de base'] },
-  { level: 2, name: 'Aventurier', minPoints: 200, maxPoints: 499, icon: '🎒', color: 'from-blue-400 to-blue-600', benefits: ['5% de réduction', 'Accès prioritaire'] },
-  { level: 3, name: 'Explorateur', minPoints: 500, maxPoints: 999, icon: '🧭', color: 'from-purple-400 to-purple-600', benefits: ['10% de réduction', 'Guides exclusifs'] },
-  { level: 4, name: 'Pionnier', minPoints: 1000, maxPoints: 1999, icon: '⭐', color: 'from-yellow-400 to-orange-500', benefits: ['15% de réduction', 'Expériences VIP'] },
-  { level: 5, name: 'Légende', minPoints: 2000, maxPoints: Infinity, icon: '👑', color: 'from-primary to-yellow-400', benefits: ['20% de réduction', 'Accès illimité', 'Conciergerie'] },
+interface ExplorerLevelDef {
+  level: number;
+  nameKey: string;
+  minPoints: number;
+  maxPoints: number;
+  icon: string;
+  color: string;
+  benefitKeys: string[];
+}
+
+interface BadgeDef {
+  id: string;
+  nameKey: string;
+  descKey: string;
+  icon: string;
+  color: string;
+  requirement: number;
+  type: Badge['type'];
+  defaultUnlocked?: boolean;
+}
+
+const EXPLORER_LEVEL_DEFS: ExplorerLevelDef[] = [
+  { level: 1, nameKey: 'level_1_name', minPoints: 0, maxPoints: 199, icon: '🌱', color: 'from-green-400 to-green-600', benefitKeys: ['level_1_benefit_1'] },
+  { level: 2, nameKey: 'level_2_name', minPoints: 200, maxPoints: 499, icon: '🎒', color: 'from-blue-400 to-blue-600', benefitKeys: ['level_2_benefit_1', 'level_2_benefit_2'] },
+  { level: 3, nameKey: 'level_3_name', minPoints: 500, maxPoints: 999, icon: '🧭', color: 'from-purple-400 to-purple-600', benefitKeys: ['level_3_benefit_1', 'level_3_benefit_2'] },
+  { level: 4, nameKey: 'level_4_name', minPoints: 1000, maxPoints: 1999, icon: '⭐', color: 'from-yellow-400 to-orange-500', benefitKeys: ['level_4_benefit_1', 'level_4_benefit_2'] },
+  { level: 5, nameKey: 'level_5_name', minPoints: 2000, maxPoints: Infinity, icon: '👑', color: 'from-primary to-yellow-400', benefitKeys: ['level_5_benefit_1', 'level_5_benefit_2', 'level_5_benefit_3'] },
 ];
 
-const DEFAULT_BADGES: Badge[] = [
-  { id: 'first-trip', name: 'Premier Pas', description: 'Effectuer votre premier voyage', icon: '👣', color: 'bg-green-500', requirement: 1, type: 'trips', unlocked: false },
-  { id: 'explorer-5', name: 'Explorateur', description: 'Visiter 5 destinations', icon: '🗺️', color: 'bg-blue-500', requirement: 5, type: 'trips', unlocked: false },
-  { id: 'globe-trotter', name: 'Globe-Trotter', description: 'Visiter 10 destinations', icon: '🌍', color: 'bg-purple-500', requirement: 10, type: 'trips', unlocked: false },
-  { id: 'first-review', name: 'Critique', description: 'Écrire votre premier avis', icon: '✍️', color: 'bg-yellow-500', requirement: 1, type: 'reviews', unlocked: false },
-  { id: 'reviewer-10', name: 'Influenceur', description: 'Écrire 10 avis', icon: '📝', color: 'bg-orange-500', requirement: 10, type: 'reviews', unlocked: false },
-  { id: 'reviewer-25', name: 'Expert Local', description: 'Écrire 25 avis', icon: '🏆', color: 'bg-red-500', requirement: 25, type: 'reviews', unlocked: false },
-  { id: 'points-500', name: 'Collectionneur', description: 'Accumuler 500 points', icon: '💎', color: 'bg-cyan-500', requirement: 500, type: 'points', unlocked: false },
-  { id: 'points-1000', name: 'Trésorier', description: 'Accumuler 1000 points', icon: '💰', color: 'bg-amber-500', requirement: 1000, type: 'points', unlocked: false },
-  { id: 'benin-lover', name: 'Amoureux du Bénin', description: 'Badge spécial pour les passionnés', icon: '🇧🇯', color: 'bg-gradient-to-r from-green-500 via-yellow-500 to-red-500', requirement: 0, type: 'special', unlocked: true },
+const BADGE_DEFS: BadgeDef[] = [
+  { id: 'first-trip', nameKey: 'badge_first_trip_name', descKey: 'badge_first_trip_desc', icon: '👣', color: 'bg-green-500', requirement: 1, type: 'trips' },
+  { id: 'explorer-5', nameKey: 'badge_explorer_5_name', descKey: 'badge_explorer_5_desc', icon: '🗺️', color: 'bg-blue-500', requirement: 5, type: 'trips' },
+  { id: 'globe-trotter', nameKey: 'badge_globe_trotter_name', descKey: 'badge_globe_trotter_desc', icon: '🌍', color: 'bg-purple-500', requirement: 10, type: 'trips' },
+  { id: 'first-review', nameKey: 'badge_first_review_name', descKey: 'badge_first_review_desc', icon: '✍️', color: 'bg-yellow-500', requirement: 1, type: 'reviews' },
+  { id: 'reviewer-10', nameKey: 'badge_reviewer_10_name', descKey: 'badge_reviewer_10_desc', icon: '📝', color: 'bg-orange-500', requirement: 10, type: 'reviews' },
+  { id: 'reviewer-25', nameKey: 'badge_reviewer_25_name', descKey: 'badge_reviewer_25_desc', icon: '🏆', color: 'bg-red-500', requirement: 25, type: 'reviews' },
+  { id: 'points-500', nameKey: 'badge_points_500_name', descKey: 'badge_points_500_desc', icon: '💎', color: 'bg-cyan-500', requirement: 500, type: 'points' },
+  { id: 'points-1000', nameKey: 'badge_points_1000_name', descKey: 'badge_points_1000_desc', icon: '💰', color: 'bg-amber-500', requirement: 1000, type: 'points' },
+  { id: 'benin-lover', nameKey: 'badge_benin_lover_name', descKey: 'badge_benin_lover_desc', icon: '🇧🇯', color: 'bg-gradient-to-r from-green-500 via-yellow-500 to-red-500', requirement: 0, type: 'special', defaultUnlocked: true },
 ];
 
 interface UserProgressContextType {
@@ -68,6 +90,7 @@ interface UserProgressContextType {
   reviews: Review[];
   points: number;
   badges: Badge[];
+  levels: ExplorerLevel[];
   
   // Level
   currentLevel: ExplorerLevel;
@@ -92,7 +115,89 @@ const POINTS_PER_TRIP = 50;
 const POINTS_PER_REVIEW = 25;
 const POINTS_PER_BOOKING = 100;
 
+const buildExplorerLevels = (t: (key: string) => string): ExplorerLevel[] => {
+  return EXPLORER_LEVEL_DEFS.map(level => ({
+    level: level.level,
+    name: t(level.nameKey),
+    minPoints: level.minPoints,
+    maxPoints: level.maxPoints,
+    icon: level.icon,
+    color: level.color,
+    benefits: level.benefitKeys.map(key => t(key)),
+  }));
+};
+
+const buildBadges = (t: (key: string) => string, saved?: Badge[]): Badge[] => {
+  const base = BADGE_DEFS.map(def => ({
+    id: def.id,
+    name: t(def.nameKey),
+    description: t(def.descKey),
+    icon: def.icon,
+    color: def.color,
+    requirement: def.requirement,
+    type: def.type,
+    unlocked: Boolean(def.defaultUnlocked),
+  }));
+
+  if (!saved) return base;
+  const savedMap = new Map(saved.map(badge => [badge.id, badge]));
+  const merged = base.map(badge => {
+    const existing = savedMap.get(badge.id);
+    if (!existing) return badge;
+    return {
+      ...badge,
+      unlocked: existing.unlocked,
+      unlockedAt: existing.unlockedAt,
+    };
+  });
+
+  // Preserve unknown badges if any
+  saved.forEach(badge => {
+    if (!merged.find(b => b.id === badge.id)) {
+      merged.push(badge);
+    }
+  });
+
+  return merged;
+};
+
+const localizeBadges = (t: (key: string) => string, badges: Badge[]) => {
+  const defMap = new Map(BADGE_DEFS.map(def => [def.id, def]));
+  return badges.map(badge => {
+    const def = defMap.get(badge.id);
+    if (!def) return badge;
+    return {
+      ...badge,
+      name: t(def.nameKey),
+      description: t(def.descKey),
+    };
+  });
+};
+
+const localizeBadge = (t: (key: string) => string, badge: Badge) => {
+  const def = BADGE_DEFS.find(d => d.id === badge.id);
+  if (!def) return badge;
+  return {
+    ...badge,
+    name: t(def.nameKey),
+    description: t(def.descKey),
+  };
+};
+
+const buildDefaultPointsHistory = (t: (key: string, params?: Record<string, string | number>) => string) => ([
+  { amount: 50, reason: t('points_reason_trip', { name: 'Palais Royaux' }), date: '2024-01-15' },
+  { amount: 25, reason: t('points_reason_review', { name: 'Palais Royaux' }), date: '2024-01-16' },
+  { amount: 50, reason: t('points_reason_trip', { name: 'Parc Pendjari' }), date: '2024-02-20' },
+  { amount: 25, reason: t('points_reason_review', { name: 'Parc Pendjari' }), date: '2024-02-21' },
+  { amount: 50, reason: t('points_reason_trip', { name: 'Ouidah' }), date: '2024-03-10' },
+  { amount: 100, reason: t('points_reason_welcome'), date: '2024-01-01' },
+  { amount: 500, reason: t('points_reason_premium'), date: '2024-03-15' },
+]);
+
 export const UserProgressProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { t } = useLanguage();
+  const levels = useMemo(() => buildExplorerLevels(t), [t]);
+
   const [trips, setTrips] = useState<Trip[]>(() => {
     const saved = localStorage.getItem('gobenin-trips');
     return saved ? JSON.parse(saved) : [
@@ -117,23 +222,22 @@ export const UserProgressProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const [badges, setBadges] = useState<Badge[]>(() => {
     const saved = localStorage.getItem('gobenin-badges');
-    return saved ? JSON.parse(saved) : DEFAULT_BADGES;
+    const parsed = saved ? JSON.parse(saved) : undefined;
+    return buildBadges(t, parsed);
   });
 
   const [pointsHistory, setPointsHistory] = useState<{ amount: number; reason: string; date: string }[]>(() => {
     const saved = localStorage.getItem('gobenin-points-history');
-    return saved ? JSON.parse(saved) : [
-      { amount: 50, reason: 'Premier voyage - Palais Royaux', date: '2024-01-15' },
-      { amount: 25, reason: 'Avis sur Palais Royaux', date: '2024-01-16' },
-      { amount: 50, reason: 'Voyage - Parc Pendjari', date: '2024-02-20' },
-      { amount: 25, reason: 'Avis sur Parc Pendjari', date: '2024-02-21' },
-      { amount: 50, reason: 'Voyage - Ouidah', date: '2024-03-10' },
-      { amount: 100, reason: 'Bonus de bienvenue', date: '2024-01-01' },
-      { amount: 500, reason: 'Réservation premium', date: '2024-03-15' },
-    ];
+    return saved ? JSON.parse(saved) : buildDefaultPointsHistory(t);
   });
 
   const [recentAchievement, setRecentAchievement] = useState<Badge | null>(null);
+
+  // Refresh localized labels when language changes
+  useEffect(() => {
+    setBadges(prev => localizeBadges(t, prev));
+    setRecentAchievement(prev => (prev ? localizeBadge(t, prev) : prev));
+  }, [t]);
 
   // Save to localStorage
   useEffect(() => {
@@ -157,11 +261,11 @@ export const UserProgressProvider: React.FC<{ children: ReactNode }> = ({ childr
   }, [pointsHistory]);
 
   // Calculate current level
-  const currentLevel = EXPLORER_LEVELS.find(
+  const currentLevel = levels.find(
     level => points >= level.minPoints && points <= level.maxPoints
-  ) || EXPLORER_LEVELS[0];
+  ) || levels[0];
 
-  const nextLevel = EXPLORER_LEVELS.find(l => l.level === currentLevel.level + 1);
+  const nextLevel = levels.find(l => l.level === currentLevel.level + 1);
   const progressToNextLevel = nextLevel 
     ? ((points - currentLevel.minPoints) / (nextLevel.minPoints - currentLevel.minPoints)) * 100
     : 100;
@@ -178,8 +282,9 @@ export const UserProgressProvider: React.FC<{ children: ReactNode }> = ({ childr
         if (badge.type === 'points' && newPoints >= badge.requirement) shouldUnlock = true;
         
         if (shouldUnlock) {
-          setRecentAchievement({ ...badge, unlocked: true, unlockedAt: new Date().toISOString() });
-          return { ...badge, unlocked: true, unlockedAt: new Date().toISOString() };
+          const unlocked = { ...badge, unlocked: true, unlockedAt: new Date().toISOString() };
+          setRecentAchievement(localizeBadge(t, unlocked));
+          return unlocked;
         }
         return badge;
       });
@@ -198,7 +303,7 @@ export const UserProgressProvider: React.FC<{ children: ReactNode }> = ({ childr
       checkBadges(updated.length, reviews.length, points + POINTS_PER_TRIP);
       return updated;
     });
-    addPoints(POINTS_PER_TRIP, `Voyage - ${trip.name}`);
+    addPoints(POINTS_PER_TRIP, t('points_reason_trip', { name: trip.name }));
   };
 
   const addReview = (review: Omit<Review, 'id' | 'date' | 'likes'>) => {
@@ -214,7 +319,7 @@ export const UserProgressProvider: React.FC<{ children: ReactNode }> = ({ childr
       return updated;
     });
     setTrips(prev => prev.map(t => t.id === review.tripId ? { ...t, reviewed: true } : t));
-    addPoints(POINTS_PER_REVIEW, `Avis sur ${review.locationName}`);
+    addPoints(POINTS_PER_REVIEW, t('points_reason_review', { name: review.locationName }));
   };
 
   const addPoints = (amount: number, reason: string) => {
@@ -234,6 +339,7 @@ export const UserProgressProvider: React.FC<{ children: ReactNode }> = ({ childr
       reviews,
       points,
       badges,
+      levels,
       currentLevel,
       progressToNextLevel,
       addTrip,
@@ -255,5 +361,3 @@ export const useUserProgress = () => {
   }
   return context;
 };
-
-export { EXPLORER_LEVELS };

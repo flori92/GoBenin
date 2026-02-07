@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -12,7 +11,6 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
   const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
   const { t } = useLanguage();
-  const { theme } = useTheme();
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,14 +35,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
       } else if (mode === 'signup') {
         const { error } = await signUp(email, password, name);
         if (error) throw error;
-        setSuccess('Vérifiez votre email pour confirmer votre compte');
+        setSuccess(t('auth_success_confirm_email'));
       } else if (mode === 'forgot') {
         const { error } = await resetPassword(email);
         if (error) throw error;
-        setSuccess('Email de réinitialisation envoyé');
+        setSuccess(t('auth_success_reset'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      setError(err instanceof Error ? err.message : t('auth_error_generic'));
     } finally {
       setLoading(false);
     }
@@ -55,7 +53,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
     try {
       await signInWithGoogle();
     } catch (err) {
-      setError('Erreur de connexion Google');
+      setError(t('auth_google_error'));
     } finally {
       setLoading(false);
     }
@@ -65,7 +63,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       
-      <div className={`relative rounded-2xl shadow-2xl w-full max-w-md p-6 border border-primary/20 animation-fade-in-up ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`}>
+      <div className="relative bg-charcoal-card rounded-2xl shadow-2xl w-full max-w-md p-6 border border-primary/20 animation-fade-in-up">
         {/* Close button */}
         <button 
           onClick={onClose}
@@ -81,15 +79,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               {mode === 'forgot' ? 'lock_reset' : 'person'}
             </span>
           </div>
-          <h2 className={`text-2xl font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-            {mode === 'login' && 'Connexion'}
-            {mode === 'signup' && 'Créer un compte'}
-            {mode === 'forgot' && 'Mot de passe oublié'}
+          <h2 className="text-2xl font-serif text-white">
+            {mode === 'login' && t('auth_login_title')}
+            {mode === 'signup' && t('auth_signup_title')}
+            {mode === 'forgot' && t('auth_forgot_title')}
           </h2>
           <p className="text-gray-400 text-sm mt-1">
-            {mode === 'login' && 'Bienvenue sur GoBénin'}
-            {mode === 'signup' && 'Rejoignez la communauté'}
-            {mode === 'forgot' && 'Réinitialisez votre mot de passe'}
+            {mode === 'login' && t('auth_login_sub')}
+            {mode === 'signup' && t('auth_signup_sub')}
+            {mode === 'forgot' && t('auth_forgot_sub')}
           </p>
         </div>
 
@@ -109,40 +107,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'signup' && (
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Nom</label>
+              <label className="block text-sm text-gray-400 mb-1">{t('auth_name_label')}</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={`w-full border rounded-lg px-4 py-3 placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors ${theme === 'dark' ? 'bg-charcoal-dark border-white/10 text-white' : 'bg-gray-50 border-gray-200 text-slate-900'}`}
-                placeholder="Votre nom"
+                className="w-full bg-charcoal-dark border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                placeholder={t('auth_name_placeholder')}
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Email</label>
+            <label className="block text-sm text-gray-400 mb-1">{t('auth_email_label')}</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className={`w-full border rounded-lg px-4 py-3 placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors ${theme === 'dark' ? 'bg-charcoal-dark border-white/10 text-white' : 'bg-gray-50 border-gray-200 text-slate-900'}`}
-              placeholder="vous@email.com"
+              className="w-full bg-charcoal-dark border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+              placeholder={t('auth_email_placeholder')}
             />
           </div>
 
           {mode !== 'forgot' && (
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Mot de passe</label>
+              <label className="block text-sm text-gray-400 mb-1">{t('auth_password_label')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className={`w-full border rounded-lg px-4 py-3 placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors ${theme === 'dark' ? 'bg-charcoal-dark border-white/10 text-white' : 'bg-gray-50 border-gray-200 text-slate-900'}`}
-                placeholder="••••••••"
+                className="w-full bg-charcoal-dark border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                placeholder={t('auth_password_placeholder')}
               />
             </div>
           )}
@@ -156,26 +154,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               <span className="material-symbols-outlined animate-spin">progress_activity</span>
             ) : (
               <>
-                {mode === 'login' && 'Se connecter'}
-                {mode === 'signup' && "S'inscrire"}
-                {mode === 'forgot' && 'Envoyer le lien'}
+                {mode === 'login' && t('auth_signin')}
+                {mode === 'signup' && t('auth_signup')}
+                {mode === 'forgot' && t('auth_send_link')}
               </>
             )}
           </button>
         </form>
 
-        {/* Google Sign In */}
+        {/* Divider */}
         {mode !== 'forgot' && (
           <>
-            <div className={`flex items-center gap-4 my-6`}>
-              <div className={`flex-1 h-px ${theme === 'dark' ? 'bg-white/10' : 'bg-gray-200'}`} />
-              <span className="text-gray-500 text-sm">ou</span>
-              <div className={`flex-1 h-px ${theme === 'dark' ? 'bg-white/10' : 'bg-gray-200'}`} />
+            <div className="flex items-center gap-4 my-6">
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-gray-500 text-sm">{t('auth_or')}</span>
+              <div className="flex-1 h-px bg-white/10" />
             </div>
+
+            {/* Google Sign In */}
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full bg-white text-gray-800 font-medium py-3 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-3 border border-gray-200"
+              className="w-full bg-white text-gray-800 font-medium py-3 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-3"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -183,7 +183,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              Continuer avec Google
+              {t('auth_google')}
             </button>
           </>
         )}
@@ -196,27 +196,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
                 onClick={() => setMode('forgot')}
                 className="text-primary hover:underline"
               >
-                Mot de passe oublié ?
+                {t('auth_forgot_link')}
               </button>
               <div className="mt-3 text-gray-400">
-                Pas de compte ?{' '}
+                {t('auth_no_account')}{' '}
                 <button 
                   onClick={() => setMode('signup')}
                   className="text-primary hover:underline"
                 >
-                  Inscrivez-vous
+                  {t('auth_signup_link')}
                 </button>
               </div>
             </>
           )}
           {mode === 'signup' && (
             <div className="text-gray-400">
-              Déjà un compte ?{' '}
+              {t('auth_have_account')}{' '}
               <button 
                 onClick={() => setMode('login')}
                 className="text-primary hover:underline"
               >
-                Connectez-vous
+                {t('auth_login_link')}
               </button>
             </div>
           )}
@@ -225,7 +225,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               onClick={() => setMode('login')}
               className="text-primary hover:underline"
             >
-              Retour à la connexion
+              {t('auth_back_login')}
             </button>
           )}
         </div>

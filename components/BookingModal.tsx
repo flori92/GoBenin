@@ -64,9 +64,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
-                      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-  const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  const dateLocale = language === 'fr' ? 'fr-FR' : 'en-US';
+  const monthNames = Array.from({ length: 12 }, (_, i) => 
+    new Date(2020, i, 1).toLocaleDateString(dateLocale, { month: 'long' })
+  );
+  const dayNames = Array.from({ length: 7 }, (_, i) => 
+    new Date(2020, 0, 5 + i).toLocaleDateString(dateLocale, { weekday: 'short' })
+  );
 
   const prevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
@@ -105,7 +109,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
       onConfirm({
         itemId: item.id,
         itemName: item.name,
-        date: selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+        date: selectedDate.toLocaleDateString(dateLocale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
         time: selectedTime,
         guests,
         totalPrice,
@@ -187,7 +191,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
       <div className="bg-charcoal-light/50 rounded-xl p-3 mb-4 flex items-center gap-3">
         <span className="material-symbols-outlined text-primary">calendar_month</span>
         <span className="text-white font-medium">
-          {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          {selectedDate?.toLocaleDateString(dateLocale, { weekday: 'long', day: 'numeric', month: 'long' })}
         </span>
       </div>
 
@@ -228,7 +232,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
             <h4 className="font-serif text-white font-medium">{item.name}</h4>
             <div className="flex items-center gap-2 mt-2 text-sm text-gray-400">
               <span className="material-symbols-outlined text-primary text-[16px]">calendar_month</span>
-              {selectedDate?.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+              {selectedDate?.toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' })}
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-400">
               <span className="material-symbols-outlined text-primary text-[16px]">schedule</span>

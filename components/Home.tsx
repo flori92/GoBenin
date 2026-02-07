@@ -71,7 +71,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
                 height: 'max(56.25vw, 100vh)',
               }}
               src={`https://www.youtube.com/embed/zfE-384HTFc?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=zfE-384HTFc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&disablekb=1&fs=0&iv_load_policy=3`}
-              title="Découvrez le Bénin"
+            title={t('hero_video_title')}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -106,7 +106,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
             {/* Notification Dropdown */}
             {showNotifications && (
               <div className="absolute top-14 right-0 w-72 bg-white dark:bg-[#2c241b] rounded-2xl shadow-xl p-4 z-50 border border-gray-100 dark:border-gray-700 animation-fade-in-down">
-                <h3 className="font-bold text-slate-900 dark:text-white mb-3">Notifications</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white mb-3">{t('notifications')}</h3>
                 <div className="flex flex-col gap-3">
                   <div className="flex items-start gap-3 p-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg cursor-pointer">
                     <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
@@ -201,8 +201,8 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
             ) : (
               <div className="p-6 text-center">
                 <span className="material-symbols-outlined text-4xl text-gray-600 mb-2">search_off</span>
-                <p className="text-gray-400 text-sm">{t('no_results') || 'Aucun résultat trouvé'}</p>
-                <p className="text-gray-500 text-xs mt-1">{t('try_another') || 'Essayez un autre terme'}</p>
+                <p className="text-gray-400 text-sm">{t('no_results')}</p>
+                <p className="text-gray-500 text-xs mt-1">{t('try_another')}</p>
               </div>
             )}
           </div>

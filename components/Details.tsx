@@ -62,7 +62,7 @@ export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) =>
           <h1 className={`text-3xl font-bold leading-tight tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{location.name}</h1>
           <div className={`flex items-center gap-1.5 mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
             <span className="material-symbols-outlined text-primary text-[20px]">location_on</span>
-            <span className="text-sm font-medium">{location.subtitle}, Benin</span>
+            <span className="text-sm font-medium">{location.subtitle}, {t('benin_label')}</span>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -144,11 +144,11 @@ export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) =>
                 <div className="mb-2 flex items-center gap-2">
                   <div className="size-8 rounded-full bg-gray-300 bg-cover bg-center" style={{ backgroundImage: `url('${IMAGES.user}')` }}></div>
                   <div>
-                    <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Sarah Jenkins</p>
+                    <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('review_author')}</p>
                     <p className="text-[10px] text-gray-400">2 {t('weeks')} {t('ago')}</p>
                   </div>
                 </div>
-                <p className={`text-xs italic line-clamp-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>"An incredible walk through history. The guides are very knowledgeable about the Dahomey Amazon warriors. Highly recommend!"</p>
+                <p className={`text-xs italic line-clamp-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>&quot;{t('review_quote')}&quot;</p>
               </div>
             </div>
           </div>
