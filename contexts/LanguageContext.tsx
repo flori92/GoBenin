@@ -9,8 +9,9 @@ interface LanguageContextType {
 }
 
 type TranslationValue = string | { one: string; other: string };
+const warnedMissingKeys = new Set<string>();
 
-const translations: Record<Language, Record<string, TranslationValue>> = {
+export const translations: Record<Language, Record<string, TranslationValue>> = {
   en: {
     welcome: "Welcome to Benin",
     explore_soul: "Explore the Soul\nof Africa",
@@ -55,6 +56,9 @@ const translations: Record<Language, Record<string, TranslationValue>> = {
     nature: "Nature",
     culture: "Culture",
     history: "Heritage",
+    relaxation: "Relaxation",
+    hotel: "Hotel",
+    cultural: "Cultural",
     voodoo: "Voodoo",
     view_on_map: "View on Map",
     book_for: "Book for",
@@ -94,6 +98,7 @@ const translations: Record<Language, Record<string, TranslationValue>> = {
     edit_time: "Edit time",
     choose_time: "Select a time",
     guests_count: "Number of guests",
+    guests_people: { one: "{count} guest", other: "{count} guests" },
     confirm_booking: "Confirm booking",
     total: "Total",
     filters_advanced: "Advanced filters",
@@ -204,8 +209,19 @@ const translations: Record<Language, Record<string, TranslationValue>> = {
     auth_success_confirm_email: "Check your email to confirm your account",
     auth_success_reset: "Password reset email sent",
     auth_google_error: "Google sign-in error",
+    about_tour: "About this tour",
+    itinerary: "Itinerary",
+    stop: "Stop",
+    whats_included: "What's included",
+    guided_tour: "Guided tour",
+    photo_ops: "Photo opportunities",
+    refreshments: "Refreshments",
+    audio_guide: "Audio guide",
+    choose_banner: "Choose banner color",
     review_author: "Sarah Jenkins",
     review_quote: "An incredible walk through history. The guides are very knowledgeable about the Dahomey Amazon warriors. Highly recommend!",
+    back: "Back",
+    book_now: "Book now",
     points_reason_trip: "Trip - {name}",
     points_reason_review: "Review for {name}",
     points_reason_booking: "Booking - {name}",
@@ -243,7 +259,9 @@ const translations: Record<Language, Record<string, TranslationValue>> = {
     badge_points_1000_name: "Treasurer",
     badge_points_1000_desc: "Earn 1000 points",
     badge_benin_lover_name: "Benin lover",
-    badge_benin_lover_desc: "Special badge for fans"
+    badge_benin_lover_desc: "Special badge for fans",
+    load_error: "Unable to load data",
+    search_error: "Search error"
   },
   fr: {
     welcome: "Bienvenue au Bénin",
@@ -293,6 +311,9 @@ const translations: Record<Language, Record<string, TranslationValue>> = {
     nature: "Nature",
     culture: "Culture",
     history: "Patrimoine",
+    relaxation: "Détente",
+    hotel: "Hôtel",
+    cultural: "Culturel",
     voodoo: "Vaudou",
     view_on_map: "Voir sur la carte",
     book_for: "Réserver pour",
@@ -328,6 +349,7 @@ const translations: Record<Language, Record<string, TranslationValue>> = {
     edit_time: "Modifier l'horaire",
     choose_time: "Choisissez un horaire",
     guests_count: "Nombre de personnes",
+    guests_people: { one: "{count} personne", other: "{count} personnes" },
     confirm_booking: "Confirmer la réservation",
     total: "Total",
     filters_advanced: "Filtres avancés",
@@ -438,8 +460,19 @@ const translations: Record<Language, Record<string, TranslationValue>> = {
     auth_success_confirm_email: "Vérifiez votre email pour confirmer votre compte",
     auth_success_reset: "Email de réinitialisation envoyé",
     auth_google_error: "Erreur de connexion Google",
+    about_tour: "À propos de ce circuit",
+    itinerary: "Itinéraire",
+    stop: "Étape",
+    whats_included: "Ce qui est inclus",
+    guided_tour: "Visite guidée",
+    photo_ops: "Opportunités photos",
+    refreshments: "Rafraîchissements",
+    audio_guide: "Audioguide",
     review_author: "Sarah Jenkins",
     review_quote: "Une marche incroyable à travers l'histoire. Les guides connaissent très bien les Amazones du Dahomey. Je recommande !",
+    back: "Retour",
+    book_now: "Réserver",
+    choose_banner: "Choisir la couleur de bannière",
     points_reason_trip: "Voyage - {name}",
     points_reason_review: "Avis sur {name}",
     points_reason_booking: "Réservation - {name}",
@@ -477,7 +510,9 @@ const translations: Record<Language, Record<string, TranslationValue>> = {
     badge_points_1000_name: "Trésorier",
     badge_points_1000_desc: "Accumuler 1000 points",
     badge_benin_lover_name: "Amoureux du Bénin",
-    badge_benin_lover_desc: "Badge spécial pour les passionnés"
+    badge_benin_lover_desc: "Badge spécial pour les passionnés",
+    load_error: "Erreur de chargement",
+    search_error: "Erreur de recherche"
   }
 };
 
@@ -507,7 +542,13 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const t = (key: string, params?: Record<string, string | number>) => {
     const entry = translations[language][key];
-    if (!entry) return key;
+    if (!entry) {
+      if (import.meta.env.DEV && !warnedMissingKeys.has(key)) {
+        warnedMissingKeys.add(key);
+        console.warn(`[i18n] Missing key: ${key}`);
+      }
+      return key;
+    }
     const text = typeof entry === 'string'
       ? entry
       : (() => {

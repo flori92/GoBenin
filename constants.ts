@@ -361,18 +361,18 @@ const DATA = {
       {
         id: 'b1',
         title: 'History of Ouidah Circuit',
-        date: 'Oct 12, 2023',
-        time: '10:00 AM',
-        guests: '2 Adults',
+        dateISO: '2023-10-12',
+        time24: '10:00',
+        guestsCount: 2,
         status: 'Confirmed',
         image: IMAGES.ouidahMuseum
       },
       {
         id: 'b2',
         title: 'Pendjari Safari Day Trip',
-        date: 'Nov 05, 2023',
-        time: '06:00 AM',
-        guests: '1 Adult',
+        dateISO: '2023-11-05',
+        time24: '06:00',
+        guestsCount: 1,
         status: 'Pending',
         image: IMAGES.pendjariSafari
       }
@@ -692,18 +692,18 @@ const DATA = {
       {
         id: 'b1',
         title: 'Circuit Histoire de Ouidah',
-        date: '12 Oct 2023',
-        time: '10:00',
-        guests: '2 Adultes',
+        dateISO: '2023-10-12',
+        time24: '10:00',
+        guestsCount: 2,
         status: 'Confirmed',
         image: IMAGES.ouidahMuseum
       },
       {
         id: 'b2',
         title: 'Excursion Safari Pendjari',
-        date: '05 Nov 2023',
-        time: '06:00',
-        guests: '1 Adulte',
+        dateISO: '2023-11-05',
+        time24: '06:00',
+        guestsCount: 1,
         status: 'Pending',
         image: IMAGES.pendjariSafari
       }

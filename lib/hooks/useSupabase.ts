@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabase';
-import { Language } from '../../contexts/LanguageContext';
+import { Language, useLanguage } from '../../contexts/LanguageContext';
 
 // Types
 export interface Destination {
@@ -72,6 +72,7 @@ export const formatTour = (tour: Tour, lang: Language) => ({
 
 // Hook pour les destinations
 export function useDestinations(type?: 'featured' | 'heritage' | 'nearby') {
+  const { t } = useLanguage();
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,7 +92,7 @@ export function useDestinations(type?: 'featured' | 'heritage' | 'nearby') {
         if (error) throw error;
         setDestinations(data || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erreur de chargement');
+        setError(err instanceof Error ? err.message : t('load_error'));
         console.error('Error fetching destinations:', err);
       } finally {
         setLoading(false);
@@ -106,6 +107,7 @@ export function useDestinations(type?: 'featured' | 'heritage' | 'nearby') {
 
 // Hook pour les tours
 export function useTours() {
+  const { t } = useLanguage();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,7 +124,7 @@ export function useTours() {
         if (error) throw error;
         setTours(data || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erreur de chargement');
+        setError(err instanceof Error ? err.message : t('load_error'));
         console.error('Error fetching tours:', err);
       } finally {
         setLoading(false);
@@ -137,6 +139,7 @@ export function useTours() {
 
 // Hook pour la recherche
 export function useSearch(query: string, lang: Language) {
+  const { t } = useLanguage();
   const [results, setResults] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -160,7 +163,7 @@ export function useSearch(query: string, lang: Language) {
         if (error) throw error;
         setResults(data || []);
       } catch (err) {
-        console.error('Search error:', err);
+        console.error(t('search_error'), err);
         setResults([]);
       } finally {
         setLoading(false);

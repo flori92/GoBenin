@@ -3,6 +3,7 @@ import { getBookings } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ViewState, Booking } from '../types';
+import { formatDateISO, formatTime24 } from '../lib/format';
 
 interface BookingsProps {
   onChangeView?: (view: ViewState) => void;
@@ -27,6 +28,24 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
       return b.status === 'Past';
     });
   }, [allBookings, activeTab]);
+
+  const getBookingDate = (booking: Booking) => {
+    if (booking.dateLabel) return booking.dateLabel;
+    if (booking.dateISO) return formatDateISO(booking.dateISO, language);
+    return (booking as any).date || '';
+  };
+
+  const getBookingTime = (booking: Booking) => {
+    if (booking.timeLabel) return booking.timeLabel;
+    if (booking.time24) return formatTime24(booking.time24, language);
+    return (booking as any).time || '';
+  };
+
+  const getBookingGuests = (booking: Booking) => {
+    if (booking.guestsLabel) return booking.guestsLabel;
+    if (typeof booking.guestsCount === 'number') return t('guests_people', { count: booking.guestsCount });
+    return (booking as any).guests || '';
+  };
 
   const handleTicketClick = (bookingId: string) => {
     setSelectedTicket(bookingId);
@@ -82,14 +101,14 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
                   <div>
                     <h3 className={`text-lg font-serif font-medium leading-tight mb-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{booking.title}</h3>
                     <div className="flex items-center gap-1.5 text-gray-400 text-sm">
-                      <span className="material-symbols-outlined text-[16px] text-primary">calendar_month</span> <span>{booking.date}</span>
+                      <span className="material-symbols-outlined text-[16px] text-primary">calendar_month</span> <span>{getBookingDate(booking)}</span>
                       <span className="w-1 h-1 rounded-full bg-gray-600"></span>
-                      <span className="material-symbols-outlined text-[16px] text-primary">schedule</span> <span>{booking.time}</span>
+                      <span className="material-symbols-outlined text-[16px] text-primary">schedule</span> <span>{getBookingTime(booking)}</span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end">
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('guests')}</span>
-                    <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{booking.guests}</span>
+                    <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{getBookingGuests(booking)}</span>
                   </div>
                 </div>
                 <hr className="border-dashed border-white/10 my-1"/>

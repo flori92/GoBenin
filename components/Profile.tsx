@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { IMAGES } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useUserProgress } from '../contexts/UserProgressContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface PaymentMethod {
   id: string;
@@ -24,8 +25,14 @@ export const Profile: React.FC = () => {
     currentLevel, progressToNextLevel,
     pointsHistory, recentAchievement, clearRecentAchievement
   } = useUserProgress();
+  const { signOut } = useAuth();
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState(IMAGES.user);
+  const [bannerColor, setBannerColor] = useState(currentLevel.color);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [showBannerPicker, setShowBannerPicker] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [showPersonalInfo, setShowPersonalInfo] = useState(false);
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
@@ -45,7 +52,7 @@ export const Profile: React.FC = () => {
     name: 'Sarah Jenkins',
     email: 'sarah.jenkins@email.com',
     phone: '+229 97 00 00 00',
-    country: 'Bénin'
+    country: t('benin_label')
   });
 
   const nextLevel = levels.find(l => l.level === currentLevel.level + 1);
@@ -112,13 +119,35 @@ export const Profile: React.FC = () => {
 
       {/* Header Profile Card */}
       <div className={`relative pb-6 rounded-b-[2.5rem] shadow-lg z-10 ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`}>
-        <div className={`absolute top-0 left-0 w-full h-36 bg-gradient-to-br ${currentLevel.color} opacity-20 rounded-b-[2.5rem]`}></div>
+        {/* Banner - Clickable to change */}
+        <button 
+          onClick={() => setShowBannerPicker(true)}
+          className={`absolute top-0 left-0 w-full h-36 bg-gradient-to-br ${bannerColor} opacity-20 rounded-b-[2.5rem] hover:opacity-30 transition-opacity`}
+        >
+          <span className="absolute top-3 right-3 material-symbols-outlined text-white/50 text-sm">edit</span>
+        </button>
         <div className="flex flex-col items-center pt-14 px-6">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full border-4 border-primary/30 shadow-glow bg-cover bg-center" style={{ backgroundImage: `url('${IMAGES.user}')` }}></div>
-            <button className="absolute bottom-0 right-0 bg-primary text-navy-dark p-1.5 rounded-full shadow-lg hover:bg-primary-light transition-colors">
+            <div className="w-24 h-24 rounded-full border-4 border-primary/30 shadow-glow bg-cover bg-center" style={{ backgroundImage: `url('${avatarUrl}')` }}></div>
+            <button 
+              onClick={() => avatarInputRef.current?.click()}
+              className="absolute bottom-0 right-0 bg-primary text-navy-dark p-1.5 rounded-full shadow-lg hover:bg-primary-light transition-colors"
+            >
               <span className="material-symbols-outlined text-sm">edit</span>
             </button>
+            <input 
+              ref={avatarInputRef}
+              type="file" 
+              accept="image/*" 
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const url = URL.createObjectURL(file);
+                  setAvatarUrl(url);
+                }
+              }}
+            />
             {/* Level badge */}
             <div className="absolute -top-1 -right-1 text-2xl">{currentLevel.icon}</div>
           </div>
@@ -766,10 +795,51 @@ export const Profile: React.FC = () => {
                 >
                   {t('cancel')}
                 </button>
-                <button className="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors">
+                <button 
+                  onClick={async () => {
+                    await signOut();
+                    setShowLogoutConfirm(false);
+                  }}
+                  className="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors"
+                >
                   {t('sign_out')}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Banner Color Picker */}
+      {showBannerPicker && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowBannerPicker(false)}>
+          <div className={`w-full max-w-sm rounded-2xl p-6 mx-4 animate-fade-in ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className={`text-lg font-serif font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('choose_banner')}</h2>
+              <button onClick={() => setShowBannerPicker(false)} className="text-gray-400 hover:text-white">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                'from-amber-500 to-orange-600',
+                'from-emerald-500 to-teal-600',
+                'from-blue-500 to-indigo-600',
+                'from-purple-500 to-pink-600',
+                'from-red-500 to-rose-600',
+                'from-cyan-500 to-blue-600',
+                'from-yellow-500 to-amber-600',
+                'from-green-500 to-emerald-600',
+              ].map((color, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setBannerColor(color);
+                    setShowBannerPicker(false);
+                  }}
+                  className={`h-16 rounded-xl bg-gradient-to-br ${color} transition-transform hover:scale-105 ${bannerColor === color ? 'ring-2 ring-primary ring-offset-2 ring-offset-charcoal-card' : ''}`}
+                />
+              ))}
             </div>
           </div>
         </div>

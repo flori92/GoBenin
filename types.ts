@@ -38,11 +38,14 @@ export interface Tour {
 export interface Booking {
   id: string;
   title: string;
-  date: string;
-  time: string;
-  guests: string;
+  dateISO?: string;
+  time24?: string;
+  guestsCount?: number;
+  dateLabel?: string;
+  timeLabel?: string;
+  guestsLabel?: string;
   status: 'Confirmed' | 'Pending' | 'Past';
   image: string;
 }
 
-export type ViewState = 'SPLASH' | 'HOME' | 'MAP' | 'TOURS' | 'BOOKINGS' | 'DETAILS' | 'PROFILE';
+export type ViewState = 'SPLASH' | 'HOME' | 'MAP' | 'TOURS' | 'TOUR_DETAILS' | 'BOOKINGS' | 'DETAILS' | 'PROFILE';

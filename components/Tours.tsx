@@ -3,13 +3,15 @@ import { getTours } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Tour } from '../types';
+import { formatCurrency } from '../lib/format';
 
 interface ToursProps {
   onBookTour?: (tour: Tour) => void;
   onViewOnMap?: (tour: Tour) => void;
+  onSelectTour?: (tour: Tour) => void;
 }
 
-export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
+export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap, onSelectTour }) => {
   const { language, t } = useLanguage();
   const { theme } = useTheme();
   const allTours = getTours(language);
@@ -214,7 +216,11 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
           </div>
         ) : (
           filteredTours.map(tour => (
-            <div key={tour.id} className="group relative flex flex-col overflow-hidden rounded-[20px] bg-charcoal-card border border-white/5 shadow-xl shadow-black/50 transition-all hover:shadow-gold hover:border-primary/30">
+            <div 
+              key={tour.id} 
+              className="group relative flex flex-col overflow-hidden rounded-[20px] bg-charcoal-card border border-white/5 shadow-xl shadow-black/50 transition-all hover:shadow-gold hover:border-primary/30 cursor-pointer"
+              onClick={() => onSelectTour?.(tour)}
+            >
               {/* Image */}
               <div className="relative h-56 w-full overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-charcoal-dark via-charcoal-dark/20 to-transparent z-10"></div>
@@ -222,7 +228,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
                   {t(tour.tags[0].toLowerCase()) || tour.tags[0]}
                 </div>
                 <button 
-                  onClick={() => toggleFavorite(tour.id)}
+                  onClick={(e) => { e.stopPropagation(); toggleFavorite(tour.id); }}
                   className={`absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-md border transition-all ${
                     favorites.has(tour.id) 
                       ? 'bg-primary text-navy-dark border-primary' 
@@ -266,16 +272,16 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
 
                 <div className="flex items-center justify-between gap-3 pt-1">
                   <button 
-                    onClick={() => onViewOnMap?.(tour)}
+                    onClick={(e) => { e.stopPropagation(); onViewOnMap?.(tour); }}
                     className="flex items-center gap-1 text-sm font-semibold text-gray-400 hover:text-primary transition-colors"
                   >
                     <span className="material-symbols-outlined text-[18px]">map</span> {t('view_on_map')}
                   </button>
                   <button 
-                    onClick={() => onBookTour?.(tour)}
+                    onClick={(e) => { e.stopPropagation(); onBookTour?.(tour); }}
                     className="flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-navy-dark shadow-glow transition-transform active:scale-95 hover:bg-primary-light"
                   >
-                    {t('book_for')} ${tour.price}
+                    {t('book_for')} {formatCurrency(tour.price, 'USD', language)}
                   </button>
                 </div>
               </div>

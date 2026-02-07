@@ -185,11 +185,11 @@ const localizeBadge = (t: (key: string) => string, badge: Badge) => {
 };
 
 const buildDefaultPointsHistory = (t: (key: string, params?: Record<string, string | number>) => string) => ([
-  { amount: 50, reason: t('points_reason_trip', { name: 'Palais Royaux' }), date: '2024-01-15' },
-  { amount: 25, reason: t('points_reason_review', { name: 'Palais Royaux' }), date: '2024-01-16' },
-  { amount: 50, reason: t('points_reason_trip', { name: 'Parc Pendjari' }), date: '2024-02-20' },
-  { amount: 25, reason: t('points_reason_review', { name: 'Parc Pendjari' }), date: '2024-02-21' },
-  { amount: 50, reason: t('points_reason_trip', { name: 'Ouidah' }), date: '2024-03-10' },
+  { amount: 50, reason: t('points_reason_trip', { name: t('default_trip_1_name') }), date: '2024-01-15' },
+  { amount: 25, reason: t('points_reason_review', { name: t('default_trip_1_name') }), date: '2024-01-16' },
+  { amount: 50, reason: t('points_reason_trip', { name: t('default_trip_2_name') }), date: '2024-02-20' },
+  { amount: 25, reason: t('points_reason_review', { name: t('default_trip_2_name') }), date: '2024-02-21' },
+  { amount: 50, reason: t('points_reason_trip', { name: t('default_trip_3_name') }), date: '2024-03-10' },
   { amount: 100, reason: t('points_reason_welcome'), date: '2024-01-01' },
   { amount: 500, reason: t('points_reason_premium'), date: '2024-03-15' },
 ]);
@@ -201,17 +201,17 @@ export const UserProgressProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [trips, setTrips] = useState<Trip[]>(() => {
     const saved = localStorage.getItem('gobenin-trips');
     return saved ? JSON.parse(saved) : [
-      { id: '1', name: 'Palais Royaux d\'Abomey', location: 'Abomey', date: '2024-01-15', image: '', reviewed: true },
-      { id: '2', name: 'Parc Pendjari', location: 'Natitingou', date: '2024-02-20', image: '', reviewed: true },
-      { id: '3', name: 'Ouidah', location: 'Ouidah', date: '2024-03-10', image: '', reviewed: false },
+      { id: '1', name: t('default_trip_1_name'), location: t('default_trip_1_location'), date: '2024-01-15', image: '', reviewed: true },
+      { id: '2', name: t('default_trip_2_name'), location: t('default_trip_2_location'), date: '2024-02-20', image: '', reviewed: true },
+      { id: '3', name: t('default_trip_3_name'), location: t('default_trip_3_location'), date: '2024-03-10', image: '', reviewed: false },
     ];
   });
 
   const [reviews, setReviews] = useState<Review[]>(() => {
     const saved = localStorage.getItem('gobenin-reviews');
     return saved ? JSON.parse(saved) : [
-      { id: '1', tripId: '1', locationName: 'Palais Royaux d\'Abomey', rating: 5, comment: 'Incroyable expérience historique!', date: '2024-01-16', likes: 12 },
-      { id: '2', tripId: '2', locationName: 'Parc Pendjari', rating: 5, comment: 'Safari magnifique, animaux sauvages au rendez-vous!', date: '2024-02-21', likes: 8 },
+      { id: '1', tripId: '1', locationName: t('default_trip_1_name'), rating: 5, comment: t('default_review_1_comment'), date: '2024-01-16', likes: 12 },
+      { id: '2', tripId: '2', locationName: t('default_trip_2_name'), rating: 5, comment: t('default_review_2_comment'), date: '2024-02-21', likes: 8 },
     ];
   });
 

@@ -13,9 +13,10 @@ interface BookingModalProps {
 export interface BookingData {
   itemId: string;
   itemName: string;
-  date: string;
-  time: string;
+  dateISO: string;
+  time24: string;
   guests: number;
+  guestsLabel: string;
   totalPrice: number;
   image: string;
 }
@@ -109,9 +110,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
       onConfirm({
         itemId: item.id,
         itemName: item.name,
-        date: selectedDate.toLocaleDateString(dateLocale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
-        time: selectedTime,
+        dateISO: selectedDate.toISOString().slice(0, 10),
+        time24: selectedTime,
         guests,
+        guestsLabel: t('guests_people', { count: guests }),
         totalPrice,
         image: item.image,
       });

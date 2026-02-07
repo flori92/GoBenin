@@ -4,6 +4,7 @@ import { Home } from './components/Home';
 import { Navigation } from './components/Navigation';
 import { Details } from './components/Details';
 import { Tours } from './components/Tours';
+import { TourDetails } from './components/TourDetails';
 import { Bookings } from './components/Bookings';
 import { MapExplorer } from './components/MapExplorer';
 import { Profile } from './components/Profile';
@@ -17,6 +18,7 @@ import { AuthProvider } from './contexts/AuthContext';
 export default function App() {
   const [view, setView] = useState<ViewState>('SPLASH');
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [bookingItem, setBookingItem] = useState<Tour | Location | null>(null);
   const [userBookings, setUserBookings] = useState<Booking[]>(() => {
     const saved = localStorage.getItem('gobenin-bookings');
@@ -42,6 +44,16 @@ export default function App() {
     setView('HOME');
   };
 
+  const handleSelectTour = (tour: Tour) => {
+    setSelectedTour(tour);
+    setView('TOUR_DETAILS');
+  };
+
+  const handleBackFromTourDetails = () => {
+    setSelectedTour(null);
+    setView('TOURS');
+  };
+
   const handleBookTour = (tour: Tour) => {
     setBookingItem(tour);
   };
@@ -58,9 +70,10 @@ export default function App() {
     const newBooking: Booking = {
       id: `booking-${Date.now()}`,
       title: bookingData.itemName,
-      date: bookingData.date,
-      time: bookingData.time,
-      guests: `${bookingData.guests} ${bookingData.guests > 1 ? 'personnes' : 'personne'}`,
+      dateISO: bookingData.dateISO,
+      time24: bookingData.time24,
+      guestsCount: bookingData.guests,
+      guestsLabel: bookingData.guestsLabel,
       status: 'Confirmed',
       image: bookingData.image,
     };
@@ -80,10 +93,21 @@ export default function App() {
       return <Details location={selectedLocation} onBack={handleBackFromDetails} onBook={() => handleBookLocation(selectedLocation)} />;
     }
 
+    if (view === 'TOUR_DETAILS' && selectedTour) {
+      return (
+        <TourDetails 
+          tour={selectedTour} 
+          onBack={handleBackFromTourDetails} 
+          onBook={() => handleBookTour(selectedTour)}
+          onViewOnMap={() => setView('MAP')}
+        />
+      );
+    }
+
     return (
       <div className="h-full min-h-screen w-full relative">
         {view === 'HOME' && <Home onSelectLocation={handleSelectLocation} />}
-        {view === 'TOURS' && <Tours onBookTour={handleBookTour} onViewOnMap={(tour) => { setView('MAP'); }} />}
+        {view === 'TOURS' && <Tours onBookTour={handleBookTour} onSelectTour={handleSelectTour} onViewOnMap={(tour) => { setView('MAP'); }} />}
         {view === 'MAP' && <MapExplorer onSelectLocation={handleSelectLocation} />}
         {view === 'BOOKINGS' && <Bookings onChangeView={setView} customBookings={userBookings} />}
         {view === 'PROFILE' && <Profile />}
