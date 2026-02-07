@@ -36,7 +36,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
   ];
 
   const filteredTours = useMemo(() => {
-    let result = allTours;
+    let result = [...allTours];
     
     // Filter by search query
     if (searchQuery.trim()) {
@@ -60,7 +60,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
     result = result.filter(tour => tour.price >= priceRange[0] && tour.price <= priceRange[1]);
     
     // Sort
-    result = [...result].sort((a, b) => {
+    result.sort((a, b) => {
       if (sortBy === 'rating') return b.rating - a.rating;
       if (sortBy === 'price') return a.price - b.price;
       return 0;
@@ -136,7 +136,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
         
         {/* Results count */}
         <div className="px-5 py-2 text-xs text-gray-500">
-          {filteredTours.length} {filteredTours.length === 1 ? 'circuit' : 'circuits'} {t('found')}
+          {t('circuits', { count: filteredTours.length })} {t('found')}
         </div>
       </div>
 

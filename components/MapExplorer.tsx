@@ -241,7 +241,7 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
             ))}
           </div>
           <div className="text-xs text-gray-500 px-1">
-            {filteredLocations.length} lieu{filteredLocations.length > 1 ? 'x' : ''} {t('found')}
+            {t('places_found', { count: filteredLocations.length })}
           </div>
         </div>
       </div>

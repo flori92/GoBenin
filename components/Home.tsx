@@ -59,20 +59,26 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
 
   return (
     <div className={`relative flex flex-col w-full pb-32 transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark text-gray-200' : 'bg-gray-50 text-slate-800'}`}>
-      {/* Immersive Video Header Section */}
-      <div className="relative w-full h-[50vh] min-h-[420px] overflow-hidden">
-        {/* Video Background */}
-        <div className="absolute inset-0 w-full h-full">
-          <iframe 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180%] h-[180%] md:w-[120%] md:h-[120%] pointer-events-none"
-            src={`https://www.youtube.com/embed/zfE-384HTFc?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=zfE-384HTFc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-            title="Découvrez le Bénin"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
+      {/* Immersive Video Header Section - Responsive pour mobile, tablette et desktop */}
+      <div className="relative w-full h-[55vh] sm:h-[50vh] min-h-[380px] max-h-[600px] overflow-hidden">
+        {/* Video Background - Adaptatif multiplateforme */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          <div className="absolute inset-0 w-full h-full" style={{ paddingBottom: '56.25%' }}>
+            <iframe 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              style={{
+                width: 'max(100vw, 177.78vh)',
+                height: 'max(56.25vw, 100vh)',
+              }}
+              src={`https://www.youtube.com/embed/zfE-384HTFc?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=zfE-384HTFc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&disablekb=1&fs=0&iv_load_policy=3`}
+              title="Découvrez le Bénin"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
         </div>
-        {/* Fallback image for slow connections */}
+        {/* Fallback image for slow connections or unsupported platforms */}
         <div className="absolute inset-0 w-full h-full bg-cover bg-center -z-10" style={{ backgroundImage: `url('${IMAGES.hero}')` }}></div>
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-navy-dark/50 to-background-dark z-[1]"></div>
@@ -170,7 +176,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
           <div className="absolute top-full left-6 right-6 mt-2 bg-charcoal-card/95 backdrop-blur-xl rounded-xl shadow-2xl border border-primary/20 max-h-80 overflow-y-auto z-50">
             {searchResults.length > 0 ? (
               <div className="p-2">
-                <p className="text-xs text-gray-500 px-3 py-2">{searchResults.length} {t('results') || 'résultat(s)'}</p>
+                <p className="text-xs text-gray-500 px-3 py-2">{t('results', { count: searchResults.length })}</p>
                 {searchResults.map((result) => (
                   <div
                     key={result.id}

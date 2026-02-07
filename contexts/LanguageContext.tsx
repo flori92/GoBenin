@@ -5,10 +5,12 @@ export type Language = 'en' | 'fr';
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }
 
-const translations: Record<Language, Record<string, string>> = {
+type TranslationValue = string | { one: string; other: string };
+
+const translations: Record<Language, Record<string, TranslationValue>> = {
   en: {
     welcome: "Welcome to Benin",
     explore_soul: "Explore the Soul\nof Africa",
@@ -71,7 +73,7 @@ const translations: Record<Language, Record<string, string>> = {
     welcome_msg: "Welcome to Benin",
     no_results: "No results found",
     try_another: "Try another search term",
-    results: "result(s)",
+    results: { one: "{count} result", other: "{count} results" },
     heritage: "Heritage",
     found: "found",
     discover: "Discover",
@@ -102,7 +104,70 @@ const translations: Record<Language, Record<string, string>> = {
     no_tours: "No tours found",
     adjust_filters: "Try changing your filters",
     reset_filters: "Reset filters",
-    benin_label: "Benin"
+    benin_label: "Benin",
+    circuits: { one: "{count} tour", other: "{count} tours" },
+    places_found: { one: "{count} place found", other: "{count} places found" },
+    new_badge: "New badge!",
+    account: "Account",
+    personal_info: "Personal information",
+    payment_methods: "Payment methods",
+    payment_methods_desc: "KKiaPay, FedaPay",
+    preferences: "Preferences",
+    notifications: "Notifications",
+    theme_mode: "Theme",
+    dark_mode: "Dark",
+    light_mode: "Light",
+    dark_mode_on: "Luxury theme enabled",
+    light_mode_on: "Light theme enabled",
+    language_label: "Language",
+    services: "Services",
+    support: "Support",
+    help_faq: "Help & FAQ",
+    contact_us: "Contact us",
+    logout: "Sign out",
+    profile_levels: "Explorer Levels",
+    current: "CURRENT",
+    unlocked: "Unlocked",
+    locked: "Locked",
+    badges: { one: "{count} badge unlocked", other: "{count} badges unlocked" },
+    badges_title: "My Badges",
+    badges_unlocked: "Unlocked ({count})",
+    badges_locked: "To unlock ({count})",
+    points_title: "My Points",
+    points_tip: "Earn points by traveling (+50), reviews (+25), and booking (+100)!",
+    history: "History",
+    trips_title: "My Trips",
+    destinations_visited: { one: "{count} destination visited", other: "{count} destinations visited" },
+    reviews_title: "My Reviews",
+    reviews_published: { one: "{count} review published", other: "{count} reviews published" },
+    leave_review: "Leave a review",
+    review_left: "Review submitted",
+    people_found_helpful: { one: "{count} person found this helpful", other: "{count} people found this helpful" },
+    logout_confirm: "Sign out",
+    logout_prompt: "Are you sure you want to sign out?",
+    cancel: "Cancel",
+    sign_out: "Sign out",
+    set_default: "Set default",
+    add_method: "Add a method",
+    payment_info: "Secure payments via local aggregators: KKiaPay and FedaPay - Mobile Money (MTN, Moov) and cards.",
+    default_label: "DEFAULT",
+    choose_language: "Choose language",
+    trips_label: "Trips",
+    reviews_label: "Reviews",
+    points_label: "Points",
+    level: "Level",
+    to_next_level: "{current} / {target} pts to {levelName}",
+    by_default: "By default",
+    edit: "Edit",
+    full_name: "Full name",
+    email: "Email",
+    phone: "Phone",
+    country: "Country",
+    evisa_title: "e-Visa application",
+    evisa_desc: "Electronic visa for Benin",
+    mobile_money_cards: "Mobile Money & Cards",
+    mtn_moov_cards: "MTN, Moov, Cards",
+    points_unit: "points"
   },
   fr: {
     welcome: "Bienvenue au Bénin",
@@ -134,7 +199,7 @@ const translations: Record<Language, Record<string, string>> = {
     splash_loading: "Chargement...",
     no_results: "Aucun résultat trouvé",
     try_another: "Essayez un autre terme",
-    results: "résultat(s)",
+    results: { one: "{count} résultat", other: "{count} résultats" },
     heritage: "Patrimoine",
     splash_text: "Bénin, un monde de splendeurs",
     price_per_person: "Prix par personne",
@@ -197,7 +262,70 @@ const translations: Record<Language, Record<string, string>> = {
     no_tours: "Aucun circuit trouvé",
     adjust_filters: "Essayez de modifier vos filtres",
     reset_filters: "Réinitialiser les filtres",
-    benin_label: "Bénin"
+    benin_label: "Bénin",
+    circuits: { one: "{count} circuit", other: "{count} circuits" },
+    places_found: { one: "{count} lieu trouvé", other: "{count} lieux trouvés" },
+    new_badge: "Nouveau badge !",
+    account: "Compte",
+    personal_info: "Informations personnelles",
+    payment_methods: "Méthodes de paiement",
+    payment_methods_desc: "KKiaPay, FedaPay",
+    preferences: "Préférences",
+    notifications: "Notifications",
+    theme_mode: "Mode",
+    dark_mode: "Sombre",
+    light_mode: "Clair",
+    dark_mode_on: "Thème luxueux activé",
+    light_mode_on: "Thème clair activé",
+    language_label: "Langue",
+    services: "Services",
+    support: "Support",
+    help_faq: "Aide & FAQ",
+    contact_us: "Nous contacter",
+    logout: "Déconnexion",
+    profile_levels: "Niveaux Explorer",
+    current: "ACTUEL",
+    unlocked: "Débloqués",
+    locked: "À débloquer",
+    badges: { one: "{count} badge débloqué", other: "{count} badges débloqués" },
+    badges_title: "Mes Badges",
+    badges_unlocked: "Débloqués ({count})",
+    badges_locked: "À débloquer ({count})",
+    points_title: "Mes Points",
+    points_tip: "Gagnez des points en voyageant (+50), en laissant des avis (+25) et en réservant (+100) !",
+    history: "Historique",
+    trips_title: "Mes Voyages",
+    destinations_visited: { one: "{count} destination visitée", other: "{count} destinations visitées" },
+    reviews_title: "Mes Avis",
+    reviews_published: { one: "{count} avis publié", other: "{count} avis publiés" },
+    leave_review: "Laisser un avis",
+    review_left: "Avis laissé",
+    people_found_helpful: { one: "{count} personne a trouvé cet avis utile", other: "{count} personnes ont trouvé cet avis utile" },
+    logout_confirm: "Déconnexion",
+    logout_prompt: "Êtes-vous sûr de vouloir vous déconnecter ?",
+    cancel: "Annuler",
+    sign_out: "Déconnecter",
+    set_default: "Définir par défaut",
+    add_method: "Ajouter une méthode",
+    payment_info: "Paiements sécurisés via des agrégateurs locaux : KKiaPay et FedaPay - Mobile Money (MTN, Moov) et cartes bancaires.",
+    default_label: "PAR DÉFAUT",
+    choose_language: "Choisir la langue",
+    trips_label: "Voyages",
+    reviews_label: "Avis",
+    points_label: "Points",
+    level: "Niveau",
+    to_next_level: "{current} / {target} pts vers {levelName}",
+    by_default: "Par défaut",
+    edit: "Modifier",
+    full_name: "Nom complet",
+    email: "Email",
+    phone: "Téléphone",
+    country: "Pays",
+    evisa_title: "Demande de e-Visa",
+    evisa_desc: "Visa électronique pour le Bénin",
+    mobile_money_cards: "Mobile Money & Cartes",
+    mtn_moov_cards: "MTN, Moov, Cartes",
+    points_unit: "points"
   }
 };
 
@@ -220,8 +348,16 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [language]);
 
-  const t = (key: string) => {
-    return translations[language][key] || key;
+  const t = (key: string, params?: Record<string, string | number>) => {
+    const entry = translations[language][key];
+    if (!entry) return key;
+    const text = typeof entry === 'string'
+      ? entry
+      : (params?.count === 1 ? entry.one : entry.other);
+    if (!params) return text;
+    return Object.entries(params).reduce((acc, [paramKey, value]) => {
+      return acc.replaceAll(`{${paramKey}}`, String(value));
+    }, text);
   };
 
   return (
