@@ -9,7 +9,7 @@ import { MapExplorer } from './components/MapExplorer';
 import { Profile } from './components/Profile';
 import { SplashScreen } from './components/SplashScreen';
 import { BookingModal, BookingData } from './components/BookingModal';
-import { LanguageProvider } from './contexts/LanguageContext';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { UserProgressProvider } from './contexts/UserProgressContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -94,6 +94,16 @@ export default function App() {
     );
   };
 
+  const SuccessToast = () => {
+    const { t } = useLanguage();
+    return (
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
+        <span className="material-symbols-outlined">check_circle</span>
+        {t('booking_success')}
+      </div>
+    );
+  };
+
   return (
     <ThemeProvider>
       <LanguageProvider>
@@ -111,12 +121,7 @@ export default function App() {
           )}
           
           {/* Success Toast */}
-          {showSuccessToast && (
-            <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
-              <span className="material-symbols-outlined">check_circle</span>
-              Réservation confirmée !
-            </div>
-          )}
+          {showSuccessToast && <SuccessToast />}
           </UserProgressProvider>
         </AuthProvider>
       </LanguageProvider>

@@ -3,6 +3,7 @@ import { IMAGES, getFeaturedDestinations, getHeritageSites, getNearbyActivities 
 import { Location } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { getLocationPriceLabel } from '../lib/format';
 
 interface HomeProps {
   onSelectLocation: (location: Location) => void;
@@ -106,8 +107,8 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
                       <span className="material-symbols-outlined text-sm">confirmation_number</span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">Booking Confirmed</p>
-                      <p className="text-xs text-gray-500">Your trip to Ouidah is confirmed for tomorrow.</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{t('booking_confirmed')}</p>
+                    <p className="text-xs text-gray-500">{t('booking_confirmed_desc')}</p>
                     </div>
                   </div>
                    <div className="flex items-start gap-3 p-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg cursor-pointer">
@@ -115,8 +116,8 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
                       <span className="material-symbols-outlined text-sm">discount</span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">20% Off Tours</p>
-                      <p className="text-xs text-gray-500">Limited time offer for Pendjari Safari.</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{t('promo_title')}</p>
+                    <p className="text-xs text-gray-500">{t('promo_desc')}</p>
                     </div>
                   </div>
                 </div>
@@ -214,7 +215,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
       <section className="mt-12">
         <div className="flex items-end justify-between px-6 mb-6">
           <div>
-            <span className="text-primary text-[10px] uppercase tracking-widest font-bold">Discover</span>
+            <span className="text-primary text-[10px] uppercase tracking-widest font-bold">{t('discover')}</span>
             <h2 className={`text-2xl font-serif font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('featured')}</h2>
           </div>
           <a className="text-primary/80 text-xs font-serif italic border-b border-primary/30 pb-0.5 hover:text-primary transition-colors" href="#">{t('see_all')}</a>
@@ -294,7 +295,9 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
               <div className="flex-1 z-10 pr-2">
                 <div className="flex justify-between items-start">
                   <h3 className={`font-serif text-lg ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{activity.name}</h3>
-                  <span className="text-primary font-bold text-[10px] bg-primary/10 border border-primary/20 px-2 py-0.5 rounded shadow-sm">{activity.price}</span>
+                  <span className="text-primary font-bold text-[10px] bg-primary/10 border border-primary/20 px-2 py-0.5 rounded shadow-sm">
+                    {getLocationPriceLabel(activity, language) || t('contact_price')}
+                  </span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1 font-display tracking-wide uppercase">{activity.subtitle}</p>
                 <div className="flex items-center mt-3 gap-4 text-xs text-gray-400">

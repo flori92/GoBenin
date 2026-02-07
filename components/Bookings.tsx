@@ -113,7 +113,7 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
         ) : (
           <div className="flex flex-col items-center justify-center py-10 opacity-60">
              <span className="material-symbols-outlined text-6xl text-primary/30 mb-2">history_edu</span>
-             <p className="text-gray-500 font-medium">No bookings found</p>
+             <p className="text-gray-500 font-medium">{t('no_bookings')}</p>
           </div>
         )}
         
@@ -137,8 +137,8 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setSelectedTicket(null)}>
           <div className="bg-white rounded-3xl overflow-hidden w-full max-w-sm relative" onClick={e => e.stopPropagation()}>
              <div className="bg-primary p-6 text-center relative">
-               <h2 className="text-xl font-bold text-white mb-1">E-Ticket</h2>
-               <p className="text-white/80 text-sm">Scan at entrance</p>
+               <h2 className="text-xl font-bold text-white mb-1">{t('e_ticket')}</h2>
+               <p className="text-white/80 text-sm">{t('scan_at_entrance')}</p>
                <button onClick={() => setSelectedTicket(null)} className="absolute top-4 right-4 text-white/80 hover:text-white">
                   <span className="material-symbols-outlined">close</span>
                </button>
@@ -153,10 +153,10 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
                 </div>
                 <div className="text-center">
                   <p className="font-bold text-lg text-slate-900">#BK-8392-BEN</p>
-                  <p className="text-sm text-gray-400">Booking ID</p>
+                  <p className="text-sm text-gray-400">{t('booking_id')}</p>
                 </div>
              </div>
-             <button className="w-full bg-gray-50 py-4 font-bold text-primary text-sm uppercase tracking-wider hover:bg-gray-100">Download PDF</button>
+             <button className="w-full bg-gray-50 py-4 font-bold text-primary text-sm uppercase tracking-wider hover:bg-gray-100">{t('download_pdf')}</button>
           </div>
         </div>
       )}

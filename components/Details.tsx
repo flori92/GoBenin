@@ -3,6 +3,7 @@ import { Location } from '../types';
 import { IMAGES } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { getLocationPriceLabel } from '../lib/format';
 
 interface DetailsProps {
   location: Location;
@@ -12,8 +13,10 @@ interface DetailsProps {
 
 export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) => {
   const images = location.images || [];
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { theme } = useTheme();
+  const priceLabel = getLocationPriceLabel(location, language);
+  const hasTicket = Boolean(location.priceAmount);
 
   return (
     <div className={`min-h-screen pb-24 relative z-50 transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark' : 'bg-gray-50'}`}>
@@ -66,7 +69,7 @@ export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) =>
             <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary-dark dark:text-primary">
               <span className="material-symbols-outlined text-[14px]">public</span> {t(location.category.toLowerCase()) || location.category}
             </span>
-             {location.price && location.price.includes('CFA') && (
+             {hasTicket && (
               <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${theme === 'dark' ? 'bg-[#2c241b] border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-slate-700'}`}>
                 {t('ticketed')}
               </span>
@@ -90,7 +93,9 @@ export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) =>
             <div className={`flex flex-col items-center justify-center rounded-2xl p-3 shadow-sm border ${theme === 'dark' ? 'bg-[#2c241b] border-gray-800' : 'bg-white border-gray-100'}`}>
               <span className="material-symbols-outlined mb-1 text-primary">payments</span>
               <span className="text-[10px] uppercase tracking-wider text-gray-400">{t('entry')}</span>
-              <span className={`text-sm font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{location.price}</span>
+              <span className={`text-sm font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                {priceLabel || t('contact_price')}
+              </span>
             </div>
           </div>
         )}
@@ -173,7 +178,9 @@ export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) =>
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
             <span className="text-xs text-gray-500">{t('price_per_person')}</span>
-            <span className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{location.price || t('contact_price')}</span>
+            <span className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+              {priceLabel || t('contact_price')}
+            </span>
           </div>
           <button 
             onClick={onBook}

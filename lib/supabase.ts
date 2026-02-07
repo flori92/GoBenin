@@ -19,7 +19,9 @@ export interface Destination {
   reviews: number;
   image: string;
   category: string;
-  price?: string;
+  priceAmount?: number;
+  priceCurrency?: 'XOF' | 'USD';
+  priceLabel?: string;
   hours?: string;
   duration?: string;
   features?: { icon: string; label: string }[];

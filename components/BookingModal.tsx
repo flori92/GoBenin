@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Tour, Location } from '../types';
+import { formatCurrency, getLocationPriceLabel } from '../lib/format';
 
 interface BookingModalProps {
   item: Tour | Location | null;
@@ -22,7 +23,7 @@ export interface BookingData {
 const AVAILABLE_TIMES = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
 
 export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onConfirm }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { theme } = useTheme();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -32,17 +33,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
 
   if (!item) return null;
 
-  const parsePrice = (value: unknown) => {
-    if (typeof value === 'number' && Number.isFinite(value)) return value;
-    if (typeof value === 'string') {
-      const digitsOnly = value.replace(/[^\d]/g, '');
-      if (digitsOnly) return parseInt(digitsOnly, 10);
-    }
-    return 45;
+  const parsePriceFromLabel = (value?: string) => {
+    if (!value) return null;
+    const digitsOnly = value.replace(/[^\d]/g, '');
+    return digitsOnly ? parseInt(digitsOnly, 10) : null;
   };
 
-  const price = 'price' in item ? parsePrice(item.price) : 45;
+  const isTour = 'price' in item;
+  const locationPriceAmount = !isTour ? item.priceAmount : null;
+  const locationCurrency = !isTour ? item.priceCurrency : null;
+  const locationLabel = !isTour ? getLocationPriceLabel(item, language) : null;
+  const fallbackAmount = locationLabel ? parsePriceFromLabel(locationLabel) : null;
+  const price = isTour ? item.price : (locationPriceAmount ?? fallbackAmount ?? 45);
+  const currency: 'XOF' | 'USD' | null = isTour ? 'USD' : (locationCurrency ?? null);
   const totalPrice = price * guests;
+  const totalLabel = currency ? formatCurrency(totalPrice, currency, language) : `$${totalPrice}`;
 
   // Calendar helpers
   const getDaysInMonth = (date: Date) => {
@@ -176,7 +181,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
         className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 self-start"
       >
         <span className="material-symbols-outlined text-sm">arrow_back</span>
-        Modifier la date
+        {t('edit_date')}
       </button>
       
       <div className="bg-charcoal-light/50 rounded-xl p-3 mb-4 flex items-center gap-3">
@@ -186,7 +191,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
         </span>
       </div>
 
-      <h4 className="text-sm text-gray-400 mb-3">Choisissez un horaire</h4>
+      <h4 className="text-sm text-gray-400 mb-3">{t('choose_time')}</h4>
       <div className="grid grid-cols-3 gap-3">
         {AVAILABLE_TIMES.map(time => (
           <button
@@ -212,7 +217,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
         className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 self-start"
       >
         <span className="material-symbols-outlined text-sm">arrow_back</span>
-        Modifier l'horaire
+        {t('edit_time')}
       </button>
 
       {/* Summary */}
@@ -235,7 +240,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
 
       {/* Guests */}
       <div className="flex items-center justify-between bg-charcoal-light/30 rounded-xl p-4 mb-4 border border-white/5">
-        <span className="text-white">Nombre de personnes</span>
+        <span className="text-white">{t('guests_count')}</span>
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setGuests(g => Math.max(1, g - 1))}
@@ -255,15 +260,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
 
       {/* Price */}
       <div className="flex items-center justify-between mb-6">
-        <span className="text-gray-400">Total</span>
-        <span className="text-2xl font-bold text-primary">${totalPrice}</span>
+        <span className="text-gray-400">{t('total')}</span>
+        <span className="text-2xl font-bold text-primary">{totalLabel}</span>
       </div>
 
       <button 
         onClick={handleConfirm}
         className="w-full bg-primary text-navy-dark font-bold py-4 rounded-xl shadow-glow active:scale-95 transition-transform"
       >
-        Confirmer la réservation
+        {t('confirm_booking')}
       </button>
     </div>
   );
@@ -277,9 +282,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className={`text-xl font-serif ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-            {step === 'date' && 'Choisir une date'}
-            {step === 'time' && 'Choisir un horaire'}
-            {step === 'confirm' && 'Confirmer'}
+            {step === 'date' && t('select_date')}
+            {step === 'time' && t('select_time')}
+            {step === 'confirm' && t('confirm')}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white p-1">
             <span className="material-symbols-outlined">close</span>

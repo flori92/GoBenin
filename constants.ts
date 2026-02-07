@@ -230,7 +230,8 @@ const DATA = {
         reviews: 124,
         image: IMAGES.palaces,
         category: 'Heritage',
-        price: '2,500 CFA',
+        priceAmount: 2500,
+        priceCurrency: 'XOF',
         hours: '09:00 - 18:00',
         duration: '2 - 3 Hrs',
         images: [IMAGES.palaceDetail, IMAGES.palaceThumb1, IMAGES.palaceThumb2, IMAGES.palaceThumb3]
@@ -297,7 +298,7 @@ const DATA = {
         image: IMAGES.food,
         category: 'Food',
         distance: '0.5 km',
-        price: '$$'
+        priceLabel: '$$'
       },
       {
         id: 'tata-somba',
@@ -309,7 +310,7 @@ const DATA = {
         image: IMAGES.hotel,
         category: 'Hotel',
         distance: '1.2 km',
-        price: '$$$'
+        priceLabel: '$$$'
       }
     ],
     tours: [
@@ -560,7 +561,8 @@ const DATA = {
         reviews: 124,
         image: IMAGES.palaces,
         category: 'Heritage',
-        price: '2,500 CFA',
+        priceAmount: 2500,
+        priceCurrency: 'XOF',
         hours: '09:00 - 18:00',
         duration: '2 - 3 Hrs',
         images: [IMAGES.palaceDetail, IMAGES.palaceThumb1, IMAGES.palaceThumb2, IMAGES.palaceThumb3]
@@ -627,7 +629,7 @@ const DATA = {
         image: IMAGES.food,
         category: 'Food',
         distance: '0.5 km',
-        price: '$$'
+        priceLabel: '$$'
       },
       {
         id: 'tata-somba',
@@ -639,7 +641,7 @@ const DATA = {
         image: IMAGES.hotel,
         category: 'Hotel',
         distance: '1.2 km',
-        price: '$$$'
+        priceLabel: '$$$'
       }
     ],
     tours: [

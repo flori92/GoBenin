@@ -136,7 +136,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
         
         {/* Results count */}
         <div className="px-5 py-2 text-xs text-gray-500">
-          {filteredTours.length} {filteredTours.length === 1 ? 'circuit' : 'circuits'} {t('found') || 'trouvé(s)'}
+          {filteredTours.length} {filteredTours.length === 1 ? 'circuit' : 'circuits'} {t('found')}
         </div>
       </div>
 
@@ -145,7 +145,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowFiltersModal(false)}>
           <div className="w-full max-w-md bg-charcoal-card rounded-t-3xl p-6 pb-10 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-serif text-white">Filtres avancés</h3>
+              <h3 className="text-xl font-serif text-white">{t('filters_advanced')}</h3>
               <button onClick={() => setShowFiltersModal(false)} className="text-gray-400 hover:text-white">
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -153,7 +153,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
             
             {/* Price Range */}
             <div className="mb-6">
-              <label className="text-sm text-gray-400 mb-3 block">Prix (${priceRange[0]} - ${priceRange[1]})</label>
+              <label className="text-sm text-gray-400 mb-3 block">{t('price')} (${priceRange[0]} - ${priceRange[1]})</label>
               <input 
                 type="range" 
                 min="0" 
@@ -166,11 +166,11 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
             
             {/* Sort By */}
             <div className="mb-6">
-              <label className="text-sm text-gray-400 mb-3 block">Trier par</label>
+              <label className="text-sm text-gray-400 mb-3 block">{t('sort_by')}</label>
               <div className="flex gap-2">
                 {[
-                  { id: 'rating', label: 'Note', icon: 'star' },
-                  { id: 'price', label: 'Prix', icon: 'payments' },
+                  { id: 'rating', label: t('rating_label'), icon: 'star' },
+                  { id: 'price', label: t('price'), icon: 'payments' },
                 ].map(option => (
                   <button
                     key={option.id}
@@ -192,7 +192,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
               onClick={() => setShowFiltersModal(false)}
               className="w-full bg-primary text-navy-dark font-bold py-3 rounded-xl shadow-glow"
             >
-              Appliquer les filtres
+              {t('apply_filters')}
             </button>
           </div>
         </div>
@@ -203,13 +203,13 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap }) => {
         {filteredTours.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <span className="material-symbols-outlined text-6xl text-primary/30 mb-4">search_off</span>
-            <p className="text-gray-400 font-medium">Aucun circuit trouvé</p>
-            <p className="text-gray-500 text-sm mt-1">Essayez de modifier vos filtres</p>
+            <p className="text-gray-400 font-medium">{t('no_tours')}</p>
+            <p className="text-gray-500 text-sm mt-1">{t('adjust_filters')}</p>
             <button 
               onClick={() => { setSearchQuery(''); setActiveFilter('all'); setPriceRange([0, 200]); }}
               className="mt-4 text-primary font-semibold hover:underline"
             >
-              Réinitialiser les filtres
+              {t('reset_filters')}
             </button>
           </div>
         ) : (

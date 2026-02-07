@@ -8,7 +8,9 @@ export interface Location {
   reviews: number;
   image: string;
   category: 'Heritage' | 'Nature' | 'Culture' | 'Relaxation' | 'Hotel' | 'Food';
-  price?: string;
+  priceAmount?: number;
+  priceCurrency?: 'XOF' | 'USD';
+  priceLabel?: string;
   distance?: string;
   lat?: number;
   lng?: number;

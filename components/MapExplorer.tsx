@@ -1,14 +1,17 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { IMAGES, getHeritageSites, getFeaturedDestinations, getNearbyActivities } from '../constants';
+import React, { useState, useMemo } from 'react';
+import { getHeritageSites, getFeaturedDestinations, getNearbyActivities } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Location } from '../types';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface MapExplorerProps {
   onSelectLocation?: (location: Location) => void;
 }
 
-// Coordonnées des sites au Bénin
+// Coordonnees des sites au Benin
 const LOCATIONS_COORDS: Record<string, { lat: number; lng: number; icon: string }> = {
   'pendjari': { lat: 11.5, lng: 1.5, icon: 'park' },
   'royal-palaces': { lat: 7.18, lng: 1.99, icon: 'castle' },
@@ -21,6 +24,10 @@ const LOCATIONS_COORDS: Record<string, { lat: number; lng: number; icon: string 
 
 const BENIN_CENTER = { lat: 9.3, lng: 2.3 };
 const MAP_BOUNDS = { latMin: 5.5, latMax: 12.5, lngMin: 0.5, lngMax: 4 };
+const MAP_MAX_BOUNDS: L.LatLngBoundsExpression = [
+  [MAP_BOUNDS.latMin, MAP_BOUNDS.lngMin],
+  [MAP_BOUNDS.latMax, MAP_BOUNDS.lngMax],
+];
 
 const hashString = (value: string) => {
   let hash = 0;
@@ -43,14 +50,13 @@ const getStableCoords = (id: string) => {
 export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) => {
   const { t, language } = useLanguage();
   const { theme } = useTheme();
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const [zoom, setZoom] = useState(7);
   const [center, setCenter] = useState(BENIN_CENTER);
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   
   // Get all locations
   const heritageSites = getHeritageSites(language);
@@ -89,16 +95,18 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
   const filters = [
     { id: 'all', label: t('all'), icon: 'explore' },
     { id: 'nature', label: t('nature'), icon: 'forest' },
-    { id: 'heritage', label: t('culture'), icon: 'temple_buddhist' },
-    { id: 'culture', label: t('history'), icon: 'history_edu' },
+    { id: 'heritage', label: t('heritage'), icon: 'temple_buddhist' },
+    { id: 'culture', label: t('culture'), icon: 'history_edu' },
     { id: 'food', label: t('food'), icon: 'restaurant' },
     { id: 'hotel', label: t('hotels'), icon: 'hotel' },
   ];
 
   const handleMarkerClick = (location: Location & { coords: { lat: number; lng: number; icon: string } }) => {
     setSelectedMarker(location.id);
-    setCenter({ lat: location.coords.lat, lng: location.coords.lng });
+    const nextCenter = { lat: location.coords.lat, lng: location.coords.lng };
+    setCenter(nextCenter);
     setZoom(10);
+    mapInstance?.flyTo(nextCenter, 10, { duration: 0.4 });
   };
 
   const handleLocationSelect = (location: Location) => {
@@ -111,96 +119,93 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          setCenter({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
+          const next = { lat: position.coords.latitude, lng: position.coords.longitude };
+          setUserLocation(next);
+          setCenter(next);
           setZoom(12);
+          mapInstance?.flyTo(next, 12, { duration: 0.5 });
         },
         (error) => {
           console.log('Geolocation error:', error);
           // Default to Cotonou if geolocation fails
-          setCenter({ lat: 6.36, lng: 2.43 });
+          const fallback = { lat: 6.36, lng: 2.43 };
+          setCenter(fallback);
+          setZoom(11);
+          mapInstance?.flyTo(fallback, 11, { duration: 0.4 });
         }
       );
     }
   };
 
-  // Convert lat/lng to pixel position on the map
-  const getMarkerPosition = (lat: number, lng: number) => {
-    // Benin bounds approximately: lat 6-12, lng 0.8-3.8
-    const x = ((lng - MAP_BOUNDS.lngMin) / (MAP_BOUNDS.lngMax - MAP_BOUNDS.lngMin)) * 100;
-    const y = ((MAP_BOUNDS.latMax - lat) / (MAP_BOUNDS.latMax - MAP_BOUNDS.latMin)) * 100;
-    return { x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) };
+  const MapEvents = () => {
+    useMapEvents({
+      moveend: (event) => {
+        const map = event.target;
+        const nextCenter = map.getCenter();
+        setCenter({ lat: nextCenter.lat, lng: nextCenter.lng });
+        setZoom(map.getZoom());
+      },
+      zoomend: (event) => {
+        const map = event.target;
+        setZoom(map.getZoom());
+      }
+    });
+    return null;
   };
-
-  const selectedLocation = filteredLocations.find(loc => loc.id === selectedMarker);
 
   return (
     <div className={`h-screen w-full overflow-hidden flex flex-col relative transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark' : 'bg-gray-50'}`}>
-      {/* Interactive Map Layer with OpenStreetMap */}
-      <div className="absolute inset-0 z-0 w-full h-full">
-        <iframe
-          src={`https://www.openstreetmap.org/export/embed.html?bbox=${center.lng - 3/zoom}%2C${center.lat - 2/zoom}%2C${center.lng + 3/zoom}%2C${center.lat + 2/zoom}&layer=mapnik&marker=${center.lat}%2C${center.lng}`}
-          className="w-full h-full border-0"
-          style={{ filter: 'saturate(0.8) contrast(1.1)' }}
-          title="Map"
-        />
-        {/* Dark overlay for luxe theme */}
+      {/* Map */}
+      <div className="absolute inset-0 z-0">
+        <MapContainer
+          center={center}
+          zoom={zoom}
+          minZoom={5}
+          maxZoom={15}
+          maxBounds={MAP_MAX_BOUNDS}
+          maxBoundsViscosity={0.8}
+          whenCreated={setMapInstance}
+          className="w-full h-full"
+        >
+          <TileLayer
+            attribution="&copy; OpenStreetMap contributors"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <MapEvents />
+          {filteredLocations.map(location => {
+            const isSelected = selectedMarker === location.id;
+            const markerIcon = L.divIcon({
+              className: '',
+              html: `<div class="${isSelected ? 'bg-primary text-navy-dark border-white' : 'bg-charcoal-card text-primary border-primary/50'} size-10 rounded-full shadow-lg border-2 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-lg">${location.coords.icon}</span>
+                    </div>`,
+              iconSize: [40, 40],
+              iconAnchor: [20, 40],
+            });
+            return (
+              <Marker
+                key={location.id}
+                position={[location.coords.lat, location.coords.lng]}
+                icon={markerIcon}
+                eventHandlers={{
+                  click: () => handleMarkerClick(location),
+                }}
+              />
+            );
+          })}
+          {userLocation && (
+            <Marker
+              position={[userLocation.lat, userLocation.lng]}
+              icon={L.divIcon({
+                className: '',
+                html: `<div class="size-4 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>`,
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+              })}
+            />
+          )}
+        </MapContainer>
         <div className="absolute inset-0 bg-navy-dark/30 pointer-events-none"></div>
-      </div>
-
-      {/* Custom Markers Overlay */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        {filteredLocations.map(location => {
-          const pos = getMarkerPosition(location.coords.lat, location.coords.lng);
-          const isSelected = selectedMarker === location.id;
-          return (
-            <div
-              key={location.id}
-              onClick={() => handleMarkerClick(location)}
-              className={`absolute flex flex-col items-center cursor-pointer pointer-events-auto transform transition-all duration-300 ${
-                isSelected ? 'scale-125 z-20' : 'hover:scale-110 z-10'
-              }`}
-              style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -100%)' }}
-            >
-              <div className={`relative flex items-center justify-center rounded-full shadow-lg border-2 transition-all ${
-                isSelected 
-                  ? 'size-12 bg-primary border-white text-navy-dark animate-bounce' 
-                  : 'size-10 bg-charcoal-card border-primary/50 text-primary hover:bg-primary hover:text-navy-dark'
-              }`}>
-                <span className="material-symbols-outlined text-xl">{location.coords.icon}</span>
-              </div>
-              {isSelected && (
-                <div className="bg-charcoal-card/95 backdrop-blur-xl px-3 py-1.5 rounded-lg shadow-lg text-xs font-bold text-white whitespace-nowrap mt-1 border border-primary/30">
-                  {location.name}
-                </div>
-              )}
-              <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent ${
-                isSelected ? 'border-t-[8px] border-t-primary' : 'border-t-[6px] border-t-charcoal-card'
-              }`}></div>
-            </div>
-          );
-        })}
-        
-        {/* User location marker */}
-        {userLocation && (
-          <div 
-            className="absolute z-30 pointer-events-none"
-            style={{ 
-              left: `${getMarkerPosition(userLocation.lat, userLocation.lng).x}%`, 
-              top: `${getMarkerPosition(userLocation.lat, userLocation.lng).y}%`,
-              transform: 'translate(-50%, -50%)'
-            }}
-          >
-            <div className="size-4 bg-blue-500 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
-            <div className="absolute inset-0 size-4 bg-blue-500/30 rounded-full animate-ping"></div>
-          </div>
-        )}
       </div>
 
       {/* Top Search Area */}
@@ -236,7 +241,7 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
             ))}
           </div>
           <div className="text-xs text-gray-500 px-1">
-            {filteredLocations.length} lieu{filteredLocations.length > 1 ? 'x' : ''} trouvé{filteredLocations.length > 1 ? 's' : ''}
+            {filteredLocations.length} lieu{filteredLocations.length > 1 ? 'x' : ''} {t('found')}
           </div>
         </div>
       </div>
@@ -246,13 +251,21 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
       {/* Floating Action Buttons */}
       <div className="absolute right-4 bottom-[280px] z-20 flex flex-col gap-3">
         <button 
-          onClick={() => setZoom(z => Math.min(15, z + 1))}
+          onClick={() => {
+            const nextZoom = Math.min(15, zoom + 1);
+            setZoom(nextZoom);
+            mapInstance?.setZoom(nextZoom);
+          }}
           className="flex size-11 items-center justify-center rounded-full bg-charcoal-card/90 backdrop-blur text-white shadow-lg border border-white/10 active:scale-95 transition-transform hover:border-primary/50"
         >
           <span className="material-symbols-outlined">add</span>
         </button>
         <button 
-          onClick={() => setZoom(z => Math.max(5, z - 1))}
+          onClick={() => {
+            const nextZoom = Math.max(5, zoom - 1);
+            setZoom(nextZoom);
+            mapInstance?.setZoom(nextZoom);
+          }}
           className="flex size-11 items-center justify-center rounded-full bg-charcoal-card/90 backdrop-blur text-white shadow-lg border border-white/10 active:scale-95 transition-transform hover:border-primary/50"
         >
           <span className="material-symbols-outlined">remove</span>
@@ -296,13 +309,13 @@ export const MapExplorer: React.FC<MapExplorerProps> = ({ onSelectLocation }) =>
                   <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-1 text-gray-500 text-xs">
                       <span className="material-symbols-outlined text-primary text-sm">location_on</span> 
-                      {location.distance || 'Bénin'}
+                      {location.distance || t('benin_label')}
                     </div>
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleMarkerClick(location); }}
                       className="text-primary text-xs font-semibold hover:underline"
                     >
-                      Voir sur carte
+                      {t('view_on_map')}
                     </button>
                   </div>
                 </div>

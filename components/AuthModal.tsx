@@ -164,7 +164,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
           </button>
         </form>
 
-        {/* Divider */}
+        {/* Google Sign In - Désactivé temporairement (nécessite configuration OAuth dans Supabase Dashboard)
         {mode !== 'forgot' && (
           <>
             <div className="flex items-center gap-4 my-6">
@@ -172,8 +172,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
               <span className="text-gray-500 text-sm">ou</span>
               <div className="flex-1 h-px bg-white/10" />
             </div>
-
-            {/* Google Sign In */}
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
@@ -189,6 +187,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMo
             </button>
           </>
         )}
+        */}
 
         {/* Footer links */}
         <div className="mt-6 text-center text-sm">
