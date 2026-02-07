@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { IMAGES, getFeaturedDestinations, getHeritageSites, getNearbyActivities } from '../constants';
 import { Location } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -17,6 +17,45 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
   const nearby = getNearbyActivities(language);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const playerRef = useRef<any>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // YouTube Player API integration
+  useEffect(() => {
+    // Load YouTube IFrame API
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // Initialize player when API is ready
+    (window as any).onYouTubeIframeAPIReady = () => {
+      playerRef.current = new (window as any).YT.Player('hero-video-player', {
+        events: {
+          onReady: (event: any) => {
+            event.target.mute();
+            event.target.playVideo();
+          }
+        }
+      });
+    };
+
+    return () => {
+      (window as any).onYouTubeIframeAPIReady = null;
+    };
+  }, []);
+
+  // Toggle mute using YouTube API
+  const toggleMute = () => {
+    if (playerRef.current) {
+      if (isMuted) {
+        playerRef.current.unMute();
+      } else {
+        playerRef.current.mute();
+      }
+    }
+    setIsMuted(!isMuted);
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [nearbyFilter, setNearbyFilter] = useState<'all' | 'Food' | 'Hotel'>('all');
@@ -65,13 +104,15 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           <div className="absolute inset-0 w-full h-full" style={{ paddingBottom: '56.25%' }}>
             <iframe 
+              id="hero-video-player"
+              ref={iframeRef}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
               style={{
                 width: 'max(100vw, 177.78vh)',
                 height: 'max(56.25vw, 100vh)',
               }}
-              src={`https://www.youtube.com/embed/zfE-384HTFc?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=zfE-384HTFc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&disablekb=1&fs=0&iv_load_policy=3`}
-            title={t('hero_video_title')}
+              src="https://www.youtube.com/embed/zfE-384HTFc?autoplay=1&mute=1&loop=1&playlist=zfE-384HTFc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&enablejsapi=1&origin=http://localhost:5173"
+              title={t('hero_video_title')}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -135,7 +176,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
         {/* Sound Toggle Button */}
         <div className="absolute bottom-6 right-6 z-10">
           <button 
-            onClick={() => setIsMuted(!isMuted)}
+            onClick={toggleMute}
             className="w-12 h-12 rounded-full bg-charcoal-dark/60 backdrop-blur-sm border border-primary/40 flex items-center justify-center shadow-lg hover:bg-primary hover:text-navy-dark transition-all group"
           >
             <span className="material-symbols-outlined text-white group-hover:text-navy-dark">

@@ -34,7 +34,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap, onSelectT
     { id: 'all', label: t('all'), icon: 'temple_buddhist' },
     { id: 'heritage', label: t('history'), icon: 'history_edu' },
     { id: 'nature', label: t('nature'), icon: 'forest' },
-    { id: 'cultural', label: t('voodoo'), icon: 'visibility' },
+    { id: 'cultural', label: t('vodun'), icon: 'visibility' },
   ];
 
   const filteredTours = useMemo(() => {

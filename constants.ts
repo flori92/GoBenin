@@ -30,7 +30,7 @@ export const IMAGES = {
   hotel: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCdNuQ1Ex8GRtResErfS70HehwwNRA5fQ2isNuu3zWb0QuIpMPMjcEXEvfdeZ_zjrmK4inm-6zE3vJpqjIFnpjpDm_kERtk9cPfkNC07JYkiiNa2IGSGehcC-FjLsUJXcG6awkGPaJgrwwxo4roPXUsZDR4fdo4zEZfWcrIWW9sC18TxEH5OeeL7QFVDZmUoDxpyuRfGnpcW1tXkkXrYetwR2rRic3Rt7LF3fuSpud7ZqcnvQfdH8gh5GT5Zl7EoYI-fptQbf_psX8',
   map: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCIfLRyZfUKQqYjr-ENudqD0nzAvWpzQYTh2SJHCY5TVjHSg_k9vG6Ki5Vhxh39grZz9UomeyubiKeLjMOEElW3sJabC_D5SvnsJv0_BU_Ks7jDJDt1WuGQaPEOwgVhUJlwFMjdhzqHR4dzFLTUq6CunnIyAFelAaTSzz43BAlODIO_nhQR7SKIWIaFGyjxSpPQxFVGK1V02BSlCv0oz2ibQo1yAd63-5Iabz67ozPySSikQPMrrasNMiNxB7W4wUOSnGLHoz6Z5D0',
   slaveRoute: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBAQVYw5fjk0Y2Wb50LuzogsSN2u5aPlQ2_VYcgXxvUYx9uouCzESpSNH4w87SZauSz7Dgv4joD_nzX0NaHUm8mvG9QyjonXhBcrqSwQ83NPo2hTiyYKt2TYDktWwXVkfPh5BZ4BtdT9XcMNiN9J9IqplUmG6VN2Zzn29_bU8XLucPON_ZCn_TFbZT1gnPZrZKb3c4IKz9J56ayotJTu_oKz_Av_pO0uk8Tph8g_TsebZVV7lxh2EbPgYDiCoBU0xZoA1x8dyBkvZ8',
-  voodoo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQEke-cVK4n7MweCUtc2Z-El6XyaDWC2a_IF4QEauQskyIFQqjUZSxbPvDM06OcSBZDn5sMpPQHtDKe3omv1dVAIT6xtJXsfhzS1yufoQbACkm5Q4SHadi_PVa69QFZ3F0FhKj6rZq7AzRFOIb4Fh4ZjWF330r9UF_ZF3unmn5PIRmH0geXIAUhAri56sq_KXSeJtLH7GNHxEYvoyNNN9TxBUKCmd18d57jcV1YGXqwb9UJpZvtmry-T6Am6Wd3LydaheW4csUvNk',
+  vodun: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQEke-cVK4n7MweCUtc2Z-El6XyaDWC2a_IF4QEauQskyIFQqjUZSxbPvDM06OcSBZDn5sMpPQHtDKe3omv1dVAIT6xtJXsfhzS1yufoQbACkm5Q4SHadi_PVa69QFZ3F0FhKj6rZq7AzRFOIb4Fh4ZjWF330r9UF_ZF3unmn5PIRmH0geXIAUhAri56sq_KXSeJtLH7GNHxEYvoyNNN9TxBUKCmd18d57jcV1YGXqwb9UJpZvtmry-T6Am6Wd3LydaheW4csUvNk',
   pendjariSafari: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBMjaI-4bdxtZ26wJ1hJQnD7IhGCIBLSuWLQrUhfnW9PFUn-GTf9pYnkIYsZ82hu7CLZ3VxNVkK-lgfPVCnRY-r0Sxcs6YFA6cNG_ysGKbMJsdBmDBqqZArT1Virl3fCRo8VV4rnXhPKDOHOdQZ9gHkfaVe2Ejdb2kEYXP8e6HZ8N2Jq8NyAUoyV8hSaXTQPem_vQTZFvMt7JwKo9nohgoBdj-ev-jxWjKelkKbFjz1seiU4baoU3TTxykocKX6TpqS46K45ftHhsM',
   ouidahMuseum: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAVJNIhQiQ7rKCkXYVKQMqWI3Hj1WIrme6dqKMT7-uxYW6hvGN7Ncxlwx8xxPqb-wt9zBxyRVyBxAFRYuFsWfsI1xErkLer9J9OpvEaHhhAcI1d1C4D525mLMLVCOIZKpNu1j1OkL5ZAxG2jk0r5fPIPBH0B86vHU0WisYkQPk9QjATgy8BWdAYZdx2v7UuUNzHA96UQN8IHxPiS8dDkgSNsoGlmeDyUdS5DRuHfv_9tcKCSiUYwk9y5zDjoXwW0s0u0Gx113qgkXs',
   palaceDetail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC2mw7lkILzKgHvVUKG37_4IfsDR4UGxuPIYYWfnZy_lEmrnN73hT4eHmLPFUibU63jovzesMrG1rc78mb5P8l3V1bbXEhrr_qJCxzUp4pkzzZKGYkKv7VpHAU5Z3tAmUFL7JrMl8QjKXPpsFBXndCQDRR_g1mOtmQDHNQh3YrdBc2Aub1IHtc-su5NesHs_ZkDorBkMUY4rYfCH4iTRcH3-RnKxAIOA9Pxoop98IdV_SBDGBROvk375BTllzdQp0nepethef7MfHU',
@@ -329,15 +329,15 @@ const DATA = {
         stopNames: ['Ouidah Museum', 'Tree of Forgetfulness']
       },
       {
-        id: 'voodoo-trail',
-        name: 'Voodoo Culture Trail',
+        id: 'vodun-trail',
+        name: 'Vodun Culture Trail',
         location: 'Allada, Benin',
         rating: 4.8,
         duration: 'Full Day',
         distance: 'Small Group',
         stops: 6,
         price: 60,
-        image: IMAGES.voodoo,
+        image: IMAGES.vodun,
         tags: ['Cultural'],
         description: 'Experience the Temple of Pythons and witness authentic Egungun masquerades.',
         stopNames: ['Temple of Pythons', 'Sacred Forest']
@@ -660,15 +660,15 @@ const DATA = {
         stopNames: ['Musée Ouidah', 'Arbre de l\'oubli']
       },
       {
-        id: 'voodoo-trail',
-        name: 'Sentier Culturel Vaudou',
+        id: 'vodun-trail',
+        name: 'Sentier Culturel Vodun',
         location: 'Allada, Bénin',
         rating: 4.8,
         duration: 'Journée',
         distance: 'Petit Groupe',
         stops: 6,
         price: 60,
-        image: IMAGES.voodoo,
+        image: IMAGES.vodun,
         tags: ['Cultural'],
         description: 'Découvrez le Temple des Pythons et assistez à d\'authentiques mascarades Egungun.',
         stopNames: ['Temple des Pythons', 'Forêt Sacrée']
