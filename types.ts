@@ -60,6 +60,11 @@ export interface NotificationItem {
   type: 'booking' | 'promo' | 'price' | 'reminder' | 'system';
   createdAt: number;
   read: boolean;
+  link?: {
+    view: ViewState;
+    itemId?: string;
+    itemType?: 'tour' | 'location' | 'booking';
+  };
 }
 
 export type ViewState = 'SPLASH' | 'HOME' | 'MAP' | 'TOURS' | 'TOUR_DETAILS' | 'BOOKINGS' | 'DETAILS' | 'PROFILE';

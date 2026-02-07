@@ -13,7 +13,7 @@ import { BookingModal, BookingData } from './components/BookingModal';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { UserProgressProvider } from './contexts/UserProgressContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { NotificationProvider, useNotifications } from './contexts/NotificationContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import { formatDateISO } from './lib/format';
@@ -46,6 +46,7 @@ const AppInner = () => {
         type: 'booking' as const,
         createdAt: now - 1000 * 60 * 45,
         read: false,
+        link: { view: 'BOOKINGS' as const },
       },
       {
         id: 'seed-promo',
@@ -54,6 +55,7 @@ const AppInner = () => {
         type: 'promo' as const,
         createdAt: now - 1000 * 60 * 120,
         read: false,
+        link: { view: 'TOURS' as const },
       },
     ];
   }, [t]);
@@ -227,18 +229,23 @@ const AppInner = () => {
 };
 
 export default function App() {
+  const NotificationBridge: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { user } = useAuth();
+    return <NotificationProvider userId={user?.id}>{children}</NotificationProvider>;
+  };
+
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <NotificationProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <NotificationBridge>
             <UserProgressProvider>
               <FavoritesProvider>
                 <AppInner />
               </FavoritesProvider>
             </UserProgressProvider>
-          </AuthProvider>
-        </NotificationProvider>
+          </NotificationBridge>
+        </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
   );

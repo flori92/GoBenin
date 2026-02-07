@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { ViewState } from '../types';
 
 const formatRelativeTime = (timestamp: number, language: 'en' | 'fr') => {
   const diffMs = Date.now() - timestamp;
@@ -32,9 +33,10 @@ const getTypeStyles = (type: string) => {
 interface NotificationsPopoverProps {
   align?: 'left' | 'right';
   className?: string;
+  onNavigate?: (view: ViewState, itemId?: string, itemType?: 'tour' | 'location' | 'booking') => void;
 }
 
-export const NotificationsPopover: React.FC<NotificationsPopoverProps> = ({ align = 'right', className = '' }) => {
+export const NotificationsPopover: React.FC<NotificationsPopoverProps> = ({ align = 'right', className = '', onNavigate }) => {
   const { language, t } = useLanguage();
   const { theme } = useTheme();
   const { notifications, unreadCount, enabled, markAllRead, markRead, dismiss, clearAll } = useNotifications();
@@ -106,7 +108,13 @@ export const NotificationsPopover: React.FC<NotificationsPopoverProps> = ({ alig
                 return (
                   <div
                     key={notification.id}
-                    onClick={() => markRead(notification.id)}
+                    onClick={() => {
+                      markRead(notification.id);
+                      if (notification.link && onNavigate) {
+                        onNavigate(notification.link.view, notification.link.itemId, notification.link.itemType);
+                        setOpen(false);
+                      }
+                    }}
                     className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-colors border ${
                       notification.read
                         ? theme === 'dark'

@@ -10,6 +10,7 @@ Exécutez les scripts dans l'ordre :
 
 1. **`migrations/001_create_tables.sql`** - Crée toutes les tables
 2. **`migrations/002_seed_data.sql`** - Insère les données initiales
+3. **`migrations/006_notifications_push.sql`** - Notifications + push tokens
 
 ### 2. Configurer l'authentification
 
@@ -76,3 +77,34 @@ const { results } = useSearch('ouidah', 'fr');
 // Auth
 const { user, signIn, signUp, signOut } = useAuth();
 ```
+
+## 🔔 Push notifications (temps réel)
+
+### 1. Tables & policies
+Le script **`migrations/006_notifications_push.sql`** crée :
+- `notifications`
+- `push_tokens`
+
+### 2. Edge Function
+Déployer la fonction **`send-push`** :
+```
+supabase functions deploy send-push
+```
+
+Variables d'environnement nécessaires :
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `EXPO_ACCESS_TOKEN` (si Expo Push)
+
+### 3. Webhook DB
+Dans le Dashboard Supabase :
+1. **Database > Webhooks**
+2. Ajouter un webhook **INSERT** sur `notifications`
+3. URL = endpoint de la fonction `send-push`
+
+### 3b. Realtime (in‑app)
+Activez Realtime sur la table `notifications` (Database > Replication > Realtime).
+
+### 4. Enregistrer les tokens
+Depuis l’app mobile (Expo recommandé), enregistrer les tokens dans `push_tokens`.
+Chaque notification insérée dans `notifications` déclenchera une push en temps réel.

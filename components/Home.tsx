@@ -150,7 +150,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation, onChangeView }) =>
             >
               {language === 'en' ? 'FR' : 'EN'}
             </button>
-            <NotificationsPopover />
+            <NotificationsPopover onNavigate={(view) => onChangeView?.(view)} />
           </div>
         </div>
 

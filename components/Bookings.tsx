@@ -67,7 +67,7 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
     <div className={`flex-1 flex flex-col h-full pb-24 overflow-y-auto transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark text-gray-200' : 'bg-gray-50 text-slate-800'}`}>
       <header className={`flex items-center justify-between px-6 py-5 sticky top-0 z-20 backdrop-blur-md pt-12 ${theme === 'dark' ? 'bg-background-dark/95' : 'bg-gray-50/95'}`}>
         <h1 className={`text-2xl font-serif font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('my_bookings')}</h1>
-        <NotificationsPopover />
+        <NotificationsPopover onNavigate={(view) => onChangeView?.(view)} />
       </header>
 
       <div className="px-6 pb-6">
