@@ -50,6 +50,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
     if (playerRef.current) {
       if (isMuted) {
         playerRef.current.unMute();
+        playerRef.current.setVolume(50);
       } else {
         playerRef.current.mute();
       }
