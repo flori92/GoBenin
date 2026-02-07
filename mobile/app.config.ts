@@ -12,12 +12,17 @@ export default {
   },
   ios: {
     supportsTablet: true,
+    bundleIdentifier: 'com.gobenin.app',
   },
   android: {
     adaptiveIcon: {
       backgroundColor: '#0b0b0b',
     },
+    package: 'com.gobenin.app',
   },
+  plugins: [
+    'expo-image',
+  ],
   extra: {
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
