@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TabNavigator } from './TabNavigator';
+import { DestinationDetailsScreen, TourDetailsScreen, BookTourScreen, MapScreen } from '../screens';
 import { useTheme } from '../contexts';
 
 const Stack = createNativeStackNavigator();
@@ -31,6 +32,10 @@ export const RootNavigator = () => {
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="MainTabs" component={TabNavigator} />
+        <Stack.Screen name="DestinationDetails" component={DestinationDetailsScreen} />
+        <Stack.Screen name="TourDetails" component={TourDetailsScreen} />
+        <Stack.Screen name="BookTour" component={BookTourScreen} />
+        <Stack.Screen name="Map" component={MapScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

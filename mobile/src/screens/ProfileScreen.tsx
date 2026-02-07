@@ -9,11 +9,29 @@ import {
   Switch,
   Alert,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, useLanguage, useAuth } from '../contexts';
 import { colors, spacing, fontSize, borderRadius } from '../theme';
 import { Header } from '../components';
+import { IMAGES } from '../constants/data';
+
+const { width } = Dimensions.get('window');
+
+const BADGES = [
+  { id: 'explorer', icon: 'compass', label: 'Explorer', color: '#3B82F6' },
+  { id: 'culture', icon: 'library', label: 'Culture', color: '#8B5CF6' },
+  { id: 'nature', icon: 'leaf', label: 'Nature', color: '#10B981' },
+  { id: 'history', icon: 'book', label: 'Heritage', color: '#F59E0B' },
+];
+
+const PAYMENT_METHODS = [
+  { id: 'kkiapay', name: 'KKiaPay', icon: '💳', description: 'Mobile Money & Cards' },
+  { id: 'fedapay', name: 'FedaPay', icon: '🏦', description: 'Local Payments' },
+];
 
 export const ProfileScreen = ({ navigation }: any) => {
   const { colors: themeColors, theme, toggleTheme } = useTheme();
@@ -25,6 +43,11 @@ export const ProfileScreen = ({ navigation }: any) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const userLevel = 2;
+  const userPoints = 1250;
+  const userTrips = 5;
+  const progressPercent = 65;
   
   const handleAuth = async () => {
     if (!email || !password) {
@@ -157,17 +180,111 @@ export const ProfileScreen = ({ navigation }: any) => {
       <Header title={t('profile')} />
       
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* User Info */}
+        {/* User Header with Level */}
         <View style={styles.userSection}>
-          <View style={styles.avatar}>
-            <Ionicons name="person" size={40} color={colors.primary} />
+          <View style={styles.userHeader}>
+            <View style={styles.avatarContainer}>
+              <Image source={{ uri: IMAGES.user }} style={styles.avatarImage} contentFit="cover" />
+              <View style={styles.levelBadge}>
+                <Text style={styles.levelBadgeText}>{userLevel}</Text>
+              </View>
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={[styles.userName, { color: themeColors.text }]}>
+                {user.email?.split('@')[0]}
+              </Text>
+              <Text style={[styles.userEmail, { color: themeColors.textSecondary }]}>
+                {user.email}
+              </Text>
+              <View style={styles.levelTag}>
+                <Ionicons name="trophy" size={12} color={colors.primary} />
+                <Text style={styles.levelTagText}>{t('level')} {userLevel} - {t('explorer')}</Text>
+              </View>
+            </View>
           </View>
-          <Text style={[styles.userName, { color: themeColors.text }]}>
-            {user.email?.split('@')[0]}
+
+          {/* Stats Row */}
+          <View style={[styles.statsRow, { backgroundColor: themeColors.card }]}>
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: themeColors.text }]}>{userPoints}</Text>
+              <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>{t('points')}</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: themeColors.text }]}>{userTrips}</Text>
+              <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>{t('trips')}</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: themeColors.text }]}>{BADGES.length}</Text>
+              <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>{t('badges')}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Progress Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: themeColors.textSecondary }]}>
+            {t('travel_progress')}
           </Text>
-          <Text style={[styles.userEmail, { color: themeColors.textSecondary }]}>
-            {user.email}
+          <View style={[styles.progressCard, { backgroundColor: themeColors.card }]}>
+            <View style={styles.progressHeader}>
+              <Text style={[styles.progressLabel, { color: themeColors.text }]}>
+                {t('level')} {userLevel} → {t('level')} {userLevel + 1}
+              </Text>
+              <Text style={[styles.progressPercent, { color: colors.primary }]}>{progressPercent}%</Text>
+            </View>
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
+            </View>
+            <Text style={[styles.progressHint, { color: themeColors.textSecondary }]}>
+              {750 - (userPoints % 750)} {t('points')} {language === 'fr' ? 'pour le prochain niveau' : 'to next level'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Badges Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: themeColors.textSecondary }]}>
+            {t('badges_earned')}
           </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgesRow}>
+            {BADGES.map((badge) => (
+              <View key={badge.id} style={[styles.badgeCard, { backgroundColor: themeColors.card }]}>
+                <View style={[styles.badgeIcon, { backgroundColor: `${badge.color}20` }]}>
+                  <Ionicons name={badge.icon as any} size={24} color={badge.color} />
+                </View>
+                <Text style={[styles.badgeLabel, { color: themeColors.text }]}>{badge.label}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Payment Methods */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={[styles.sectionTitle, { color: themeColors.textSecondary }]}>
+              {t('payment_methods')}
+            </Text>
+            <TouchableOpacity>
+              <Text style={styles.addButton}>{t('add_payment')}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={[styles.settingsCard, { backgroundColor: themeColors.card }]}>
+            {PAYMENT_METHODS.map((method, index) => (
+              <TouchableOpacity 
+                key={method.id}
+                style={[styles.paymentItem, index < PAYMENT_METHODS.length - 1 && styles.paymentItemBorder]}
+              >
+                <Text style={styles.paymentIcon}>{method.icon}</Text>
+                <View style={styles.paymentInfo}>
+                  <Text style={[styles.paymentName, { color: themeColors.text }]}>{method.name}</Text>
+                  <Text style={[styles.paymentDesc, { color: themeColors.textSecondary }]}>{method.description}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={themeColors.textSecondary} />
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
         
         {/* Settings Section */}
@@ -224,6 +341,32 @@ export const ProfileScreen = ({ navigation }: any) => {
                 </View>
                 <Text style={[styles.settingLabel, { color: themeColors.text }]}>
                   {t('notifications')}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={themeColors.textSecondary} />
+            </TouchableOpacity>
+
+            {/* Help & Support */}
+            <TouchableOpacity style={styles.settingItem}>
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
+                  <Ionicons name="help-circle" size={20} color="#8B5CF6" />
+                </View>
+                <Text style={[styles.settingLabel, { color: themeColors.text }]}>
+                  {t('help_support')}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={themeColors.textSecondary} />
+            </TouchableOpacity>
+
+            {/* Privacy */}
+            <TouchableOpacity style={[styles.settingItem, { borderBottomWidth: 0 }]}>
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: 'rgba(107, 114, 128, 0.15)' }]}>
+                  <Ionicons name="shield-checkmark" size={20} color="#6B7280" />
+                </View>
+                <Text style={[styles.settingLabel, { color: themeColors.text }]}>
+                  {t('privacy')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={themeColors.textSecondary} />
@@ -329,25 +472,87 @@ const styles = StyleSheet.create({
     marginLeft: spacing.xs,
   },
   userSection: {
-    alignItems: 'center',
-    padding: spacing.xl,
+    padding: spacing.lg,
   },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+  userHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatarImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 3,
+    borderColor: colors.primary,
+  },
+  levelBadge: {
+    position: 'absolute',
+    bottom: -4,
+    right: -4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  levelBadgeText: {
+    color: '#000',
+    fontSize: fontSize.xs,
+    fontWeight: '700',
+  },
+  userInfo: {
+    flex: 1,
+    marginLeft: spacing.md,
   },
   userName: {
     fontSize: fontSize.xl,
     fontWeight: '700',
-    marginTop: spacing.md,
   },
   userEmail: {
-    fontSize: fontSize.md,
-    marginTop: spacing.xs,
+    fontSize: fontSize.sm,
+    marginTop: 2,
+  },
+  levelTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    alignSelf: 'flex-start',
+    marginTop: spacing.sm,
+    gap: 4,
+  },
+  levelTagText: {
+    color: colors.primary,
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: fontSize.xl,
+    fontWeight: '700',
+  },
+  statLabel: {
+    fontSize: fontSize.xs,
+    marginTop: 2,
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   section: {
     paddingHorizontal: spacing.lg,
@@ -407,5 +612,96 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: '600',
     marginLeft: spacing.sm,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  addButton: {
+    color: colors.primary,
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+  },
+  progressCard: {
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  progressLabel: {
+    fontSize: fontSize.md,
+    fontWeight: '500',
+  },
+  progressPercent: {
+    fontSize: fontSize.md,
+    fontWeight: '700',
+  },
+  progressBarBg: {
+    height: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 4,
+  },
+  progressHint: {
+    fontSize: fontSize.xs,
+    marginTop: spacing.sm,
+  },
+  badgesRow: {
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
+  },
+  badgeCard: {
+    width: 80,
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+  },
+  badgeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  badgeLabel: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  paymentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+  },
+  paymentItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  paymentIcon: {
+    fontSize: 24,
+    marginRight: spacing.md,
+  },
+  paymentInfo: {
+    flex: 1,
+  },
+  paymentName: {
+    fontSize: fontSize.md,
+    fontWeight: '600',
+  },
+  paymentDesc: {
+    fontSize: fontSize.xs,
+    marginTop: 2,
   },
 });
