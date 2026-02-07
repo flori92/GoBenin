@@ -17,6 +17,7 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
   const defaultBookings = getBookings(language);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   // Combine custom bookings with default ones
   const allBookings = useMemo(() => {
@@ -142,6 +143,12 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
                         {t('complete_payment')}
                       </button>
                   )}
+                  <button
+                    onClick={() => setSelectedBooking(booking)}
+                    className="px-4 rounded-xl border border-primary/40 text-primary text-sm font-bold hover:bg-primary/10 transition-colors"
+                  >
+                    {t('view_details')}
+                  </button>
                 </div>
               </div>
             </div>
@@ -193,6 +200,60 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
                 </div>
              </div>
              <button className="w-full bg-gray-50 py-4 font-bold text-primary text-sm uppercase tracking-wider hover:bg-gray-100">{t('download_pdf')}</button>
+          </div>
+        </div>
+      )}
+
+      {selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setSelectedBooking(null)}>
+          <div className={`rounded-3xl overflow-hidden w-full max-w-md relative ${theme === 'dark' ? 'bg-charcoal-card' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+              <div>
+                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('booking_details')}</h2>
+                <p className="text-xs text-gray-400">{selectedBooking.id}</p>
+              </div>
+              <button onClick={() => setSelectedBooking(null)} className="text-gray-400 hover:text-white">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-6 flex flex-col gap-4">
+              <div className="flex gap-4">
+                <div className="w-24 h-24 rounded-2xl bg-cover bg-center" style={{ backgroundImage: `url('${selectedBooking.image}')` }}></div>
+                <div className="flex-1">
+                  <h3 className={`text-lg font-serif font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{selectedBooking.title}</h3>
+                  <p className="text-sm text-gray-400 mt-1">{getBookingDate(selectedBooking)}</p>
+                  <p className="text-sm text-gray-400">{getBookingTime(selectedBooking)}</p>
+                </div>
+              </div>
+
+              <div className={`rounded-2xl p-4 border ${theme === 'dark' ? 'border-white/5 bg-white/5' : 'border-gray-200 bg-gray-50'}`}>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-400">{t('provider')}</span>
+                  <span className={`${theme === 'dark' ? 'text-white' : 'text-slate-900'} font-semibold`}>{getBookingProvider(selectedBooking)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm mt-2">
+                  <span className="text-gray-400">{t('guests')}</span>
+                  <span className={`${theme === 'dark' ? 'text-white' : 'text-slate-900'} font-semibold`}>{getBookingGuests(selectedBooking)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm mt-2">
+                  <span className="text-gray-400">{t('booking_status')}</span>
+                  <span className={`${theme === 'dark' ? 'text-white' : 'text-slate-900'} font-semibold`}>{selectedBooking.status}</span>
+                </div>
+                {getBookingTotal(selectedBooking) && (
+                  <div className="flex items-center justify-between text-sm mt-2">
+                    <span className="text-gray-400">{t('total')}</span>
+                    <span className="text-primary font-semibold">{getBookingTotal(selectedBooking)}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col items-center gap-3">
+                <div className={`border-2 border-dashed rounded-2xl p-6 ${theme === 'dark' ? 'border-white/10' : 'border-gray-200'}`}>
+                  <span className="material-symbols-outlined text-[140px] text-slate-900">qr_code_2</span>
+                </div>
+                <p className="text-xs text-gray-400">{t('scan_at_entrance')}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

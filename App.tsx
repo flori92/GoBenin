@@ -18,10 +18,12 @@ import { NotificationProvider, useNotifications } from './contexts/NotificationC
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import { formatDateISO } from './lib/format';
 import { SmartBookingData } from './components/BookingHub';
+import { useUserBookings } from './lib/hooks/useSupabase';
 
 const AppInner = () => {
   const { t, language } = useLanguage();
   const { notify, seed } = useNotifications();
+  const { user } = useAuth();
   const [view, setView] = useState<ViewState>('SPLASH');
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
@@ -31,6 +33,7 @@ const AppInner = () => {
     return saved ? JSON.parse(saved) : [];
   });
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const { bookings: supabaseBookings, createBooking } = useUserBookings(user?.id ?? null);
 
   useEffect(() => {
     localStorage.setItem('gobenin-bookings', JSON.stringify(userBookings));
@@ -100,7 +103,7 @@ const AppInner = () => {
     setBookingItem(null);
   };
 
-  const handleConfirmBooking = (bookingData: BookingData) => {
+  const handleConfirmBooking = async (bookingData: BookingData) => {
     const newBooking: Booking = {
       id: `booking-${Date.now()}`,
       title: bookingData.itemName,
@@ -114,8 +117,24 @@ const AppInner = () => {
       totalPrice: bookingData.totalPrice,
       currency: bookingData.currency,
     };
-
-    setUserBookings(prev => [newBooking, ...prev]);
+    
+    if (user) {
+      try {
+        await createBooking({
+          destination_id: bookingData.itemType === 'location' ? bookingData.itemId : undefined,
+          tour_id: bookingData.itemType === 'tour' ? bookingData.itemId : undefined,
+          date: bookingData.dateISO,
+          time: bookingData.time24,
+          guests: bookingData.guests,
+          total_price: bookingData.totalPrice,
+        });
+      } catch (error) {
+        console.error(error);
+        setUserBookings(prev => [newBooking, ...prev]);
+      }
+    } else {
+      setUserBookings(prev => [newBooking, ...prev]);
+    }
     setBookingItem(null);
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
@@ -130,7 +149,7 @@ const AppInner = () => {
     });
   };
 
-  const handleSmartBooking = (data: SmartBookingData) => {
+  const handleSmartBooking = async (data: SmartBookingData) => {
     const stayLabel = `${formatDateISO(data.checkIn, language)} → ${formatDateISO(data.checkOut, language)}`;
     const newBooking: Booking = {
       id: `booking-${Date.now()}`,
@@ -145,7 +164,22 @@ const AppInner = () => {
       currency: data.currency,
     };
 
-    setUserBookings(prev => [newBooking, ...prev]);
+    if (user) {
+      try {
+        await createBooking({
+          destination_id: data.locationId,
+          date: data.checkIn,
+          time: undefined,
+          guests: data.guests,
+          total_price: data.totalPrice,
+        });
+      } catch (error) {
+        console.error(error);
+        setUserBookings(prev => [newBooking, ...prev]);
+      }
+    } else {
+      setUserBookings(prev => [newBooking, ...prev]);
+    }
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 3000);
 
@@ -188,10 +222,39 @@ const AppInner = () => {
 
     return (
       <div className="h-full min-h-screen w-full relative">
-        {view === 'HOME' && <Home onSelectLocation={handleSelectLocation} onChangeView={setView} />}
+        {view === 'HOME' && <Home onSelectLocation={handleSelectLocation} />}
         {view === 'TOURS' && <Tours onBookTour={handleBookTour} onSelectTour={handleSelectTour} onViewOnMap={() => { setView('MAP'); }} />}
         {view === 'MAP' && <MapExplorer onSelectLocation={handleSelectLocation} />}
-        {view === 'BOOKINGS' && <Bookings onChangeView={setView} customBookings={userBookings} />}
+        {view === 'BOOKINGS' && (
+          <Bookings
+            onChangeView={setView}
+            customBookings={
+              user
+                ? (supabaseBookings || []).map((booking: any) => ({
+                    id: booking.id,
+                    title:
+                      (language === 'fr' ? booking.destinations?.name_fr : booking.destinations?.name_en) ||
+                      (language === 'fr' ? booking.tours?.name_fr : booking.tours?.name_en) ||
+                      'Booking',
+                    dateISO: booking.date,
+                    time24: booking.time || undefined,
+                    guestsCount: booking.guests,
+                    guestsLabel: booking.guests ? t('guests_people', { count: booking.guests }) : undefined,
+                    status:
+                      booking.status === 'completed' || booking.status === 'cancelled'
+                        ? 'Past'
+                        : booking.status === 'pending'
+                          ? 'Pending'
+                          : 'Confirmed',
+                    image: booking.destinations?.image || booking.tours?.image || '',
+                    provider: 'GoBenin',
+                    totalPrice: booking.total_price || undefined,
+                    currency: 'XOF',
+                  }))
+                : userBookings
+            }
+          />
+        )}
         {view === 'PROFILE' && <Profile />}
 
         {/* Navigation is persistent across main tabs */}

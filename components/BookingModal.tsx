@@ -12,6 +12,7 @@ interface BookingModalProps {
 
 export interface BookingData {
   itemId: string;
+  itemType: 'location' | 'tour';
   itemName: string;
   dateISO: string;
   time24: string;
@@ -111,6 +112,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
     if (selectedDate && selectedTime) {
       onConfirm({
         itemId: item.id,
+        itemType: isTour ? 'tour' : 'location',
         itemName: item.name,
         dateISO: selectedDate.toISOString().slice(0, 10),
         time24: selectedTime,

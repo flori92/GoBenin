@@ -15,6 +15,7 @@ import {
 
 export interface SmartBookingData {
   provider: BookingProvider;
+  locationId: string;
   checkIn: string;
   checkOut: string;
   guests: number;
@@ -72,6 +73,7 @@ export const BookingHub: React.FC<BookingHubProps> = ({ location, onSmartBook })
   const handleReserve = (offer: BookingOffer) => {
     onSmartBook?.({
       provider: offer.provider,
+      locationId: location.id,
       checkIn,
       checkOut,
       guests,
