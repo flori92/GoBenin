@@ -35,6 +35,8 @@ export interface Tour {
   stopNames: readonly string[];
 }
 
+export type BookingProvider = 'Airbnb' | 'Booking.com' | 'GoBenin';
+
 export interface Booking {
   id: string;
   title: string;
@@ -46,6 +48,18 @@ export interface Booking {
   guestsLabel?: string;
   status: 'Confirmed' | 'Pending' | 'Past';
   image: string;
+  provider?: BookingProvider;
+  totalPrice?: number;
+  currency?: 'XOF' | 'USD';
+}
+
+export interface NotificationItem {
+  id: string;
+  title: string;
+  message: string;
+  type: 'booking' | 'promo' | 'price' | 'reminder' | 'system';
+  createdAt: number;
+  read: boolean;
 }
 
 export type ViewState = 'SPLASH' | 'HOME' | 'MAP' | 'TOURS' | 'TOUR_DETAILS' | 'BOOKINGS' | 'DETAILS' | 'PROFILE';

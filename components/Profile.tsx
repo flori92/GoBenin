@@ -4,6 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useUserProgress } from '../contexts/UserProgressContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
 
 interface PaymentMethod {
   id: string;
@@ -27,7 +28,7 @@ export const Profile: React.FC = () => {
   } = useUserProgress();
   const { signOut } = useAuth();
   
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const { enabled: notificationsEnabled, toggleEnabled } = useNotifications();
   const [avatarUrl, setAvatarUrl] = useState(IMAGES.user);
   const [bannerColor, setBannerColor] = useState(currentLevel.color);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
@@ -288,7 +289,7 @@ export const Profile: React.FC = () => {
                 <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('notifications')}</span>
               </div>
               <button 
-                onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                onClick={toggleEnabled}
                 className={`w-14 h-7 rounded-full p-1 transition-all duration-300 ${notificationsEnabled ? 'bg-primary shadow-glow' : theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}
               >
                 <div className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300 ${notificationsEnabled ? 'translate-x-7' : 'translate-x-0'}`}></div>

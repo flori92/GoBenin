@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { getTours } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useFavorites } from '../contexts/FavoritesContext';
 import { Tour } from '../types';
 import { formatCurrency } from '../lib/format';
 
@@ -15,20 +16,13 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap, onSelectT
   const { language, t } = useLanguage();
   const { theme } = useTheme();
   const allTours = getTours(language);
+  const { favorites, toggleFavorite, isFavorite } = useFavorites();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
-  const [favorites, setFavorites] = useState<Set<string>>(() => {
-    const saved = localStorage.getItem('gobenin-favorites');
-    return saved ? new Set<string>(JSON.parse(saved)) : new Set();
-  });
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
   const [sortBy, setSortBy] = useState<'rating' | 'price' | 'duration'>('rating');
-
-  useEffect(() => {
-    localStorage.setItem('gobenin-favorites', JSON.stringify(Array.from(favorites)));
-  }, [favorites]);
 
   const filters = [
     { id: 'all', label: t('all'), icon: 'temple_buddhist' },
@@ -71,18 +65,7 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap, onSelectT
     return result;
   }, [allTours, searchQuery, activeFilter, priceRange, sortBy]);
 
-  const toggleFavorite = (tourId: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(tourId)) {
-        newFavorites.delete(tourId);
-      } else {
-        newFavorites.add(tourId);
-      }
-      return newFavorites;
-    });
-  };
-
+  
   return (
     <div className={`flex flex-col h-full transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark text-gray-200' : 'bg-gray-50 text-slate-800'}`}>
       {/* Sticky Header */}
@@ -230,12 +213,12 @@ export const Tours: React.FC<ToursProps> = ({ onBookTour, onViewOnMap, onSelectT
                 <button 
                   onClick={(e) => { e.stopPropagation(); toggleFavorite(tour.id); }}
                   className={`absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-md border transition-all ${
-                    favorites.has(tour.id) 
+                    isFavorite(tour.id) 
                       ? 'bg-primary text-navy-dark border-primary' 
                       : 'bg-charcoal-dark/40 text-white border-white/10 hover:bg-primary hover:text-navy-dark hover:border-primary'
                   }`}
                 >
-                  <span className={`material-symbols-outlined text-[20px] ${favorites.has(tour.id) ? 'fill-1' : ''}`}>favorite</span>
+                  <span className={`material-symbols-outlined text-[20px] ${isFavorite(tour.id) ? 'fill-1' : ''}`}>favorite</span>
                 </button>
                 <div className="h-full w-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-110" style={{ backgroundImage: `url('${tour.image}')` }}></div>
               </div>

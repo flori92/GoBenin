@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { Tour, Location } from '../types';
+import { Tour, Location, BookingProvider } from '../types';
 import { formatCurrency, getLocationPriceLabel } from '../lib/format';
 
 interface BookingModalProps {
@@ -19,6 +19,8 @@ export interface BookingData {
   guestsLabel: string;
   totalPrice: number;
   image: string;
+  provider?: BookingProvider;
+  currency?: 'XOF' | 'USD';
 }
 
 const AVAILABLE_TIMES = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
@@ -116,6 +118,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ item, onClose, onCon
         guestsLabel: t('guests_people', { count: guests }),
         totalPrice,
         image: item.image,
+        provider: 'GoBenin',
+        currency: currency || undefined,
       });
     }
   };

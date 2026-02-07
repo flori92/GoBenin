@@ -122,7 +122,7 @@ const DATA = {
       {
         id: 'babs-dock',
         name: "Bab's Dock",
-        subtitle: 'Ganvie',
+        subtitle: 'Togbin',
         description: 'A scenic lagoon-side stop where the setting and wildlife make for a memorable visit.',
         rating: 4.3,
         reviews: 94,
@@ -453,7 +453,7 @@ const DATA = {
       {
         id: 'babs-dock',
         name: 'Bab\'s Dock',
-        subtitle: 'Ganvié',
+        subtitle: 'Togbin',
         description: 'Sur place le cadre est magique, la lagune, les animaux (ânes, tortues, alligators, singes) raviront les enfants.',
         rating: 4.3,
         reviews: 94,
@@ -696,7 +696,8 @@ const DATA = {
         time24: '10:00',
         guestsCount: 2,
         status: 'Confirmed',
-        image: IMAGES.ouidahMuseum
+        image: IMAGES.ouidahMuseum,
+        provider: 'GoBenin'
       },
       {
         id: 'b2',
@@ -705,7 +706,8 @@ const DATA = {
         time24: '06:00',
         guestsCount: 1,
         status: 'Pending',
-        image: IMAGES.pendjariSafari
+        image: IMAGES.pendjariSafari,
+        provider: 'GoBenin'
       }
     ]
   }

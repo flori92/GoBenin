@@ -3,7 +3,8 @@ import { getBookings } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ViewState, Booking } from '../types';
-import { formatDateISO, formatTime24 } from '../lib/format';
+import { formatCurrency, formatDateISO, formatTime24 } from '../lib/format';
+import { NotificationsPopover } from './NotificationsPopover';
 
 interface BookingsProps {
   onChangeView?: (view: ViewState) => void;
@@ -47,6 +48,17 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
     return (booking as any).guests || '';
   };
 
+  const getBookingProvider = (booking: Booking) => {
+    return booking.provider || 'GoBenin';
+  };
+
+  const getBookingTotal = (booking: Booking) => {
+    if (booking.totalPrice && booking.currency) {
+      return formatCurrency(booking.totalPrice, booking.currency, language);
+    }
+    return null;
+  };
+
   const handleTicketClick = (bookingId: string) => {
     setSelectedTicket(bookingId);
   }
@@ -55,10 +67,7 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
     <div className={`flex-1 flex flex-col h-full pb-24 overflow-y-auto transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark text-gray-200' : 'bg-gray-50 text-slate-800'}`}>
       <header className={`flex items-center justify-between px-6 py-5 sticky top-0 z-20 backdrop-blur-md pt-12 ${theme === 'dark' ? 'bg-background-dark/95' : 'bg-gray-50/95'}`}>
         <h1 className={`text-2xl font-serif font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t('my_bookings')}</h1>
-        <button className="bg-charcoal-dark/50 backdrop-blur-md text-primary border border-primary/30 w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary hover:text-navy-dark transition-all shadow-glow relative">
-          <span className="material-symbols-outlined">notifications</span>
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
+        <NotificationsPopover />
       </header>
 
       <div className="px-6 pb-6">
@@ -99,7 +108,12 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
               <div className="p-5 flex flex-col gap-3">
                 <div className="flex justify-between items-start gap-2">
                   <div>
-                    <h3 className={`text-lg font-serif font-medium leading-tight mb-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{booking.title}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className={`text-lg font-serif font-medium leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{booking.title}</h3>
+                      <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border ${theme === 'dark' ? 'border-white/10 text-gray-300' : 'border-gray-200 text-gray-600'}`}>
+                        {getBookingProvider(booking)}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-1.5 text-gray-400 text-sm">
                       <span className="material-symbols-outlined text-[16px] text-primary">calendar_month</span> <span>{getBookingDate(booking)}</span>
                       <span className="w-1 h-1 rounded-full bg-gray-600"></span>
@@ -109,6 +123,9 @@ export const Bookings: React.FC<BookingsProps> = ({ onChangeView, customBookings
                   <div className="flex flex-col items-end">
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('guests')}</span>
                     <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{getBookingGuests(booking)}</span>
+                    {getBookingTotal(booking) && (
+                      <span className="text-xs text-primary font-semibold mt-1">{getBookingTotal(booking)}</span>
+                    )}
                   </div>
                 </div>
                 <hr className="border-dashed border-white/10 my-1"/>

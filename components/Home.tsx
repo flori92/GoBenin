@@ -1,27 +1,55 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { IMAGES, getFeaturedDestinations, getHeritageSites, getNearbyActivities } from '../constants';
 import { Location } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getLocationPriceLabel } from '../lib/format';
+import { NotificationsPopover } from './NotificationsPopover';
+import { ViewState } from '../types';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 interface HomeProps {
   onSelectLocation: (location: Location) => void;
+  onChangeView?: (view: ViewState) => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
+export const Home: React.FC<HomeProps> = ({ onSelectLocation, onChangeView }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme } = useTheme();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const featured = getFeaturedDestinations(language);
   const heritage = getHeritageSites(language);
   const nearby = getNearbyActivities(language);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [iframeReady, setIframeReady] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Listen for YouTube iframe ready message
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin === 'https://www.youtube.com') {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'onReady' || data.info?.playerState !== undefined) {
+            setIframeReady(true);
+          }
+        } catch {
+          // Ignore non-JSON messages
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    // Set ready after a delay as fallback
+    const timer = setTimeout(() => setIframeReady(true), 2000);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Toggle mute using postMessage to YouTube iframe
   const toggleMute = () => {
-    if (iframeRef.current?.contentWindow) {
+    if (iframeRef.current?.contentWindow && iframeReady) {
       if (isMuted) {
         // Unmute and set volume to 50%
         iframeRef.current.contentWindow.postMessage(
@@ -122,40 +150,7 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
             >
               {language === 'en' ? 'FR' : 'EN'}
             </button>
-            <button 
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="bg-charcoal-dark/50 backdrop-blur-md text-primary border border-primary/30 w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary hover:text-navy-dark transition-all shadow-glow relative"
-            >
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-
-            {/* Notification Dropdown */}
-            {showNotifications && (
-              <div className="absolute top-14 right-0 w-72 bg-white dark:bg-[#2c241b] rounded-2xl shadow-xl p-4 z-50 border border-gray-100 dark:border-gray-700 animation-fade-in-down">
-                <h3 className="font-bold text-slate-900 dark:text-white mb-3">{t('notifications')}</h3>
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-start gap-3 p-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg cursor-pointer">
-                    <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-sm">confirmation_number</span>
-                    </div>
-                    <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">{t('booking_confirmed')}</p>
-                    <p className="text-xs text-gray-500">{t('booking_confirmed_desc')}</p>
-                    </div>
-                  </div>
-                   <div className="flex items-start gap-3 p-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg cursor-pointer">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-sm">discount</span>
-                    </div>
-                    <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">{t('promo_title')}</p>
-                    <p className="text-xs text-gray-500">{t('promo_desc')}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            <NotificationsPopover />
           </div>
         </div>
 
@@ -196,6 +191,15 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
           <button className="bg-primary text-navy-dark w-11 h-11 rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 hover:bg-primary-light transition-colors">
             <span className="material-symbols-outlined">tune</span>
           </button>
+          {onChangeView && (
+            <button 
+              onClick={() => onChangeView('MAP')}
+              className="bg-charcoal-dark/80 text-primary border border-primary/30 w-11 h-11 rounded-lg flex items-center justify-center shadow-lg hover:bg-primary hover:text-navy-dark transition-colors"
+              title={t('explore_map')}
+            >
+              <span className="material-symbols-outlined">map</span>
+            </button>
+          )}
         </div>
 
         {/* Search Results Dropdown */}
@@ -269,8 +273,15 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
                 <p className="text-xs text-gray-400 font-display uppercase tracking-widest mb-1">{dest.subtitle}</p>
                 <div className="w-8 h-[1px] bg-primary mt-2"></div>
               </div>
-              <button className="absolute top-3 right-3 bg-charcoal-dark/40 backdrop-blur-md p-2 rounded-full text-white border border-white/10 hover:bg-primary hover:text-navy-dark hover:border-primary transition-all">
-                <span className="material-symbols-outlined text-[20px]">favorite</span>
+              <button 
+                onClick={(e) => { e.stopPropagation(); toggleFavorite(dest.id); }}
+                className={`absolute top-3 right-3 backdrop-blur-md p-2 rounded-full border transition-all ${
+                  isFavorite(dest.id) 
+                    ? 'bg-primary text-navy-dark border-primary' 
+                    : 'bg-charcoal-dark/40 text-white border-white/10 hover:bg-primary hover:text-navy-dark hover:border-primary'
+                }`}
+              >
+                <span className={`material-symbols-outlined text-[20px] ${isFavorite(dest.id) ? 'fill-1' : ''}`}>favorite</span>
               </button>
             </div>
           ))}

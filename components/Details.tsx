@@ -4,19 +4,30 @@ import { IMAGES } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getLocationPriceLabel } from '../lib/format';
+import { BookingHub, SmartBookingData } from './BookingHub';
 
 interface DetailsProps {
   location: Location;
   onBack: () => void;
   onBook?: () => void;
+  onSmartBook?: (data: SmartBookingData) => void;
 }
 
-export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) => {
+export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook, onSmartBook }) => {
   const images = location.images || [];
   const { t, language } = useLanguage();
   const { theme } = useTheme();
   const priceLabel = getLocationPriceLabel(location, language);
   const hasTicket = Boolean(location.priceAmount);
+  const isStay = location.category === 'Hotel';
+
+  const handlePrimaryAction = () => {
+    if (isStay) {
+      document.getElementById('smart-booking-hub')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    onBook?.();
+  };
 
   return (
     <div className={`min-h-screen pb-24 relative z-50 transition-colors duration-300 ${theme === 'dark' ? 'bg-background-dark' : 'bg-gray-50'}`}>
@@ -124,6 +135,12 @@ export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) =>
           </div>
         </div>
 
+        {isStay && (
+          <div className="mb-8">
+            <BookingHub location={location} onSmartBook={onSmartBook} />
+          </div>
+        )}
+
         {/* Reviews Snapshot */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -183,10 +200,10 @@ export const Details: React.FC<DetailsProps> = ({ location, onBack, onBook }) =>
             </span>
           </div>
           <button 
-            onClick={onBook}
+            onClick={handlePrimaryAction}
             className="flex-1 rounded-xl bg-primary px-6 py-3.5 text-center text-sm font-bold text-navy-dark shadow-glow transition-transform active:scale-95 hover:bg-primary-light"
           >
-            {t('book_visit')}
+            {isStay ? t('compare_offers') : t('book_visit')}
           </button>
         </div>
       </div>
