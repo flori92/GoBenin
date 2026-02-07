@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { IMAGES, getFeaturedDestinations, getHeritageSites, getNearbyActivities } from '../constants';
 import { Location } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -17,42 +17,27 @@ export const Home: React.FC<HomeProps> = ({ onSelectLocation }) => {
   const nearby = getNearbyActivities(language);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const playerRef = useRef<any>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // YouTube Player API integration
-  useEffect(() => {
-    // Load YouTube IFrame API
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-    // Initialize player when API is ready
-    (window as any).onYouTubeIframeAPIReady = () => {
-      playerRef.current = new (window as any).YT.Player('hero-video-player', {
-        events: {
-          onReady: (event: any) => {
-            event.target.mute();
-            event.target.playVideo();
-          }
-        }
-      });
-    };
-
-    return () => {
-      (window as any).onYouTubeIframeAPIReady = null;
-    };
-  }, []);
-
-  // Toggle mute using YouTube API
+  // Toggle mute using postMessage to YouTube iframe
   const toggleMute = () => {
-    if (playerRef.current) {
+    if (iframeRef.current?.contentWindow) {
       if (isMuted) {
-        playerRef.current.unMute();
-        playerRef.current.setVolume(50);
+        // Unmute and set volume to 50%
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func: 'unMute' }),
+          '*'
+        );
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func: 'setVolume', args: [50] }),
+          '*'
+        );
       } else {
-        playerRef.current.mute();
+        // Mute
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func: 'mute' }),
+          '*'
+        );
       }
     }
     setIsMuted(!isMuted);
